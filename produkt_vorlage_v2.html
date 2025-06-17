@@ -53,7 +53,7 @@
         .product-header {
             font-size: 2.5em;
             font-weight: 700;
-            color: var(--text-dark);
+            color: var(--brand-color); /* CORRECTED: Was --text-dark, now uses the brand color */
             line-height: 1.2;
         }
 
@@ -68,13 +68,13 @@
 
         .image-section .product-image-main {
             max-width: 100%;
-            max-height: 400px; /* GEÄNDERT: Maximale Höhe für das Hauptbild festgelegt */
+            max-height: 400px;
             width: auto;
             height: auto;
             display: block;
             margin-left: auto;
             margin-right: auto;
-            object-fit: contain; /* Stellt sicher, dass das Bild passt, ohne es zu verzerren */
+            object-fit: contain;
             border-radius: 12px;
             border: 1px solid var(--border-color);
         }
@@ -161,13 +161,13 @@
 
         .detail-images-grid img {
             max-width: 100%;
-            max-height: 220px; /* GEÄNDERT: Maximale Höhe für Detailbilder festgelegt */
+            max-height: 220px;
             width: auto;
             height: auto;
             display: block;
             margin-left: auto;
             margin-right: auto;
-            object-fit: contain; /* Stellt sicher, dass das Bild passt, ohne es zu verzerren */
+            object-fit: contain;
             border-radius: 12px;
             border: 1px solid var(--border-color);
         }
