@@ -139,10 +139,57 @@ def main():
 
     st.divider()
 
+    # DATEN FÜR GRÖSSENTABELLEN
+    size_charts_de = {
+        "Briefs": {
+            "type": "simple",  # Typ für das HTML-Rendering
+            "title": "Maßtabelle Damen und Herren",
+            "footer": "* Die suprima-Größe entspricht der Damen-Konfektionsgröße.",
+            "headers": ["suprima-Größe*", "Wäschegröße (Herren)", "Hüftumfang (cm)"],
+            "rows": [
+                # Gruppierung der Daten für eine bessere Darstellung in HTML
+                {"size_group": "S", "values": [["36", "4", "90-92"], ["38", "4", "93-96"]]},
+                {"size_group": "M", "values": [["40", "5", "97-100"], ["42", "5", "101-104"]]},
+                {"size_group": "L", "values": [["44", "6", "105-108"], ["46", "6", "109-112"]]},
+                {"size_group": "XL", "values": [["48", "7", "113-116"], ["50", "7", "117-121"]]},
+                {"size_group": "XXL", "values": [["52", "8", "122-126"], ["54", "8", "127-132"]]},
+                {"size_group": "XXXL",
+                 "values": [["56", "9", "133-138"], ["58", "9", "139-144"], ["60", "10", "145-150"]]}
+            ]
+        },
+        "Overall": {
+            "type": "complex",  # Typ für das HTML-Rendering
+            "title": "Maßtabelle Overalls",
+            "tables": [
+                {
+                    "subtitle": "für Sie",
+                    "headers": ["S", "M", "L", "XL", "XXL"],
+                    "rows": [
+                        ["36/38", "40/42", "44/46", "48/50", "52/54/56"]
+                    ]
+                },
+                {
+                    "subtitle": "für Ihn",
+                    "headers": ["S", "M", "L", "XL", "XXL"],
+                    "rows": [
+                        ["44", "46/48", "50/52", "54/56", "58/60"]
+                    ]
+                },
+                {
+                    "subtitle": "für Kinder",
+                    "title_full": "Angaben entsprechen der Körpergröße des Kindes",
+                    "rows": [
+                        ["110/116", "122/128", "134/140", "146/152", "158/164"]
+                    ]
+                }
+            ]
+        }
+    }
+
     # Deutsche Standardtexte, die übersetzt werden sollen
     default_texts_de = {
-        "ean_code_label": "EAN",  # HINZUGEFÜGT
         "article_number_label": "Art.Nr.",
+        "ean_code_label": "EAN",
         "oeko_tex_standard_text": "OEKO-TEX® STANDARD 100",
         "oeko_tex_logo_alt_text": "OEKO-TEX Logo Platzhalter",
         "oeko_tex_tested_text": "Geprüft auf Schadstoffe.",
@@ -158,7 +205,7 @@ def main():
 
     # Produktdaten, die vom Benutzer eingegeben werden
     product_data_de = {
-        "ean_code_value": "4051512345678",  # HINZUGEFÜGT
+        "ean_code_value": "4051512345678",
         "article_number_value": "ART-12345",
         "warning_text_value": "Ihre volle Wirkung entfalten die suprima Hüftprotektor-Systeme nur durch den Einsatz von suprima-Protektoren!",
         "color_name_value": "Schwarz",
@@ -186,8 +233,8 @@ def main():
                                                                                         "suprima Protektor-Slip (ohne Protektoren)"),
                                     key="product_name_de_input")
     ean_code_value_de = st.text_input("EAN Code", value=st.session_state.get("ean_code_value_de",
-                                                                             product_data_de["ean_code_value"]),
-                                      key="ean_code_input")  # HINZUGEFÜGT
+                                                                             product_data_de.get("ean_code_value", "")),
+                                      key="ean_code_input")
     article_number_value_de = st.text_input("Artikelnummer", value=st.session_state.get("article_number_value_de",
                                                                                         product_data_de[
                                                                                             "article_number_value"]),
@@ -242,13 +289,21 @@ def main():
 
     st.divider()
 
-    st.header("2. Zielsprache auswählen")
-    language_options_with_flags = ["🇫🇷 Französisch", "🇬🇧 Englisch", "🇪🇸 Spanisch", "🇮🇹 Italienisch", "🇩🇪 Deutsch",
-                                   "🇳🇱 Niederländisch", "🇵🇹 Portugiesisch", "🇵🇱 Polnisch", "🇹🇷 Türkisch",
-                                   "🇸🇪 Schwedisch", "🇩🇰 Dänisch", "🇳🇴 Norwegisch", "🇫🇮 Finnisch", "🇮🇸 Isländisch",
-                                   "🇪🇪 Estnisch", "🇱🇻 Lettisch", "🇱🇹 Litauisch"]
-    selected_target_language_with_flag = st.selectbox("Zielsprache auswählen:", options=language_options_with_flags,
-                                                      key="target_language_selectbox")
+    st.header("2. Zielsprache & Optionen auswählen")
+    col1_options, col2_options = st.columns(2)
+    with col1_options:
+        language_options_with_flags = [
+            "🇬🇧 Englisch", "🇫🇷 Französisch", "🇩🇪 Deutsch", "🇪🇸 Spanisch", "🇮🇹 Italienisch",
+            "🇳🇱 Niederländisch", "🇵🇹 Portugiesisch", "🇵🇱 Polnisch", "🇹🇷 Türkisch",
+            "🇸🇪 Schwedisch", "🇩🇰 Dänisch", "🇳🇴 Norwegisch", "🇫🇮 Finnisch", "🇮🇸 Isländisch",
+            "🇪🇪 Estnisch", "🇱🇻 Lettisch", "🇱🇹 Litauisch",
+            "🇯🇵 Japanisch", "🇨🇳 Chinesisch (vereinfacht)"
+        ]
+        selected_target_language_with_flag = st.selectbox("Zielsprache auswählen:", options=language_options_with_flags,
+                                                          key="target_language_selectbox")
+    with col2_options:
+        product_type = st.selectbox("Produkttyp für Größentabelle:", options=["Keine", "Briefs", "Overall"],
+                                    key="product_type_select")
 
     st.divider()
 
@@ -317,6 +372,62 @@ def main():
                     time.sleep(0.5)
             translated_context["care_instructions"] = translated_care_items
 
+            if product_type != "Keine":
+                chart_data = size_charts_de[product_type]
+                translated_chart = {
+                    "type": chart_data["type"],
+                    "rows": chart_data.get("rows", []),
+                    "tables": []
+                }
+
+                trans_title, err_title = translate_text_gemini_api_call(chart_data["title"], source_language,
+                                                                        actual_target_language);
+                time.sleep(0.5)
+                translated_chart["title"] = trans_title
+                if err_title: any_errors = True
+
+                if "footer" in chart_data:
+                    trans_footer, err_footer = translate_text_gemini_api_call(chart_data["footer"], source_language,
+                                                                              actual_target_language);
+                    time.sleep(0.5)
+                    translated_chart["footer"] = trans_footer
+                    if err_footer: any_errors = True
+
+                if "headers" in chart_data:
+                    translated_headers = []
+                    for header in chart_data["headers"]:
+                        trans_header, err_header = translate_text_gemini_api_call(header, source_language,
+                                                                                  actual_target_language);
+                        time.sleep(0.5)
+                        translated_headers.append(trans_header)
+                        if err_header: any_errors = True
+                    translated_chart["headers"] = translated_headers
+
+                if "tables" in chart_data:
+                    for sub_table_data in chart_data["tables"]:
+                        translated_sub_table = {"rows": sub_table_data["rows"]}
+                        trans_subtitle, err_subtitle = translate_text_gemini_api_call(sub_table_data["subtitle"],
+                                                                                      source_language,
+                                                                                      actual_target_language);
+                        time.sleep(0.5)
+                        translated_sub_table["subtitle"] = trans_subtitle
+                        if err_subtitle: any_errors = True
+                        if "title_full" in sub_table_data:
+                            trans_title_full, err_tf = translate_text_gemini_api_call(sub_table_data["title_full"],
+                                                                                      source_language,
+                                                                                      actual_target_language);
+                            time.sleep(0.5)
+                            translated_sub_table["title_full"] = trans_title_full
+                            if err_tf: any_errors = True
+                        if "headers" in sub_table_data:
+                            translated_sub_headers = [
+                                translate_text_gemini_api_call(h, source_language, actual_target_language)[0] for h in
+                                sub_table_data["headers"]]
+                            translated_sub_table["headers"] = translated_sub_headers
+                        translated_chart["tables"].append(translated_sub_table)
+
+                translated_context["size_chart"] = translated_chart
+
             if any_errors:
                 st.session_state.error_message = "Einige Texte konnten nicht übersetzt werden. Bitte überprüfen Sie die Ausgabe."
             else:
@@ -324,7 +435,7 @@ def main():
 
             final_context = {
                 **translated_context,
-                "ean_code_value": ean_code_value_de,  # HINZUGEFÜGT
+                "ean_code_value": ean_code_value_de,
                 "article_number_value": article_number_value_de,
                 "available_sizes_value": available_sizes_value_de,
                 "lang_code": get_html_lang_code(actual_target_language),
