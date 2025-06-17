@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="{{ lang_code | default('de') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product_name }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+        :root {
+            --brand-color: #367a76;
+            --text-dark: #1e293b;
+            --text-light: #475569;
+            --bg-soft: #f8f9fa;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-light);
+            background-color: var(--bg-soft);
+            margin: 0;
+            padding: 24px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .page-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 48px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05), 0 4px 10px rgba(0,0,0,0.02);
+            border: 1px solid var(--border-color);
+        }
+
+        .header-grid {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 24px;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--brand-color);
+        }
+
+        .header-logo img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .product-header {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.2;
+        }
+
+        .main-content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            margin-bottom: 32px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .image-section .product-image-main {
+            max-width: 100%;
+            max-height: 400px; /* GEÄNDERT: Maximale Höhe für das Hauptbild festgelegt */
+            width: auto;
+            height: auto;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            object-fit: contain; /* Stellt sicher, dass das Bild passt, ohne es zu verzerren */
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .oeko-tex-box {
+            border: 1px solid var(--border-color);
+            text-align: center;
+            padding: 16px;
+            font-size: 0.8em;
+            color: #6b7280;
+            margin-top: 24px;
+            border-radius: 8px;
+            background-color: var(--bg-soft);
+        }
+
+        .details-section p, .details-section ul {
+            margin: 0;
+            padding: 0;
+            line-height: 1.7;
+            font-size: 1em;
+        }
+
+        .details-section > * {
+            margin-bottom: 28px;
+        }
+        .details-section > *:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-item {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .features-list {
+            list-style: none;
+        }
+
+        .features-list li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .checkmark {
+            color: var(--brand-color);
+            font-weight: 700;
+            margin-right: 12px;
+            font-size: 1.3em;
+            line-height: 1.5;
+        }
+
+        .warning-box {
+            padding: 16px;
+            font-size: 0.9em;
+            background-color: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            color: #78350f;
+        }
+
+        .warning-box strong {
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #92400e;
+        }
+
+        .section-title {
+            font-size: 1.75em;
+            font-weight: 700;
+            color: var(--brand-color);
+            margin-top: 40px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .detail-images-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .detail-images-grid img {
+            max-width: 100%;
+            max-height: 220px; /* GEÄNDERT: Maximale Höhe für Detailbilder festgelegt */
+            width: auto;
+            height: auto;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            object-fit: contain; /* Stellt sicher, dass das Bild passt, ohne es zu verzerren */
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .care-instructions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .care-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-soft);
+        }
+
+        .care-item img {
+            width: 32px;
+            height: 32px;
+            margin-right: 16px;
+        }
+
+        .footer-notes {
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.85em;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .footer-notes strong {
+            color: var(--text-light);
+        }
+
+        @media print {
+            body { background-color: #fff; padding: 0; font-family: 'Poppins', sans-serif; }
+            .page-container { margin: 0; box-shadow: none; max-width: 100%; padding: 20px; border: none; }
+            .product-header, .section-title { color: var(--brand-color) !important; }
+            .header-grid, .section-title { border-bottom-color: var(--brand-color) !important; }
+            .checkmark { color: var(--brand-color) !important; }
+            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <header class="header-grid">
+            <div class="header-logo">
+                {% if suprima_logo_url %}
+                    <img src="{{ suprima_logo_url }}" alt="Suprima Logo">
+                {% else %}
+                    <div style="width:150px; height:50px; background:#e5e7eb; text-align:center; line-height:50px; font-size:12px; color:#9ca3af; border-radius:8px;">Logo</div>
+                {% endif %}
+            </div>
+            <h1 class="product-header">{{ product_name }}</h1>
+        </header>
+
+        <div class="main-content-grid">
+            <div class="image-section">
+                <img src="{{ image_main_url }}" alt="Hauptbild des Produkts" class="product-image-main">
+                {% if oeko_tex_standard_text %}
+                <div class="oeko-tex-box">
+                    <p><strong>{{ oeko_tex_standard_text }}</strong></p>
+                    <p>{{ oeko_tex_logo_alt_text }}</p>
+                    <p>{{ oeko_tex_tested_text }}</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="details-section">
+                <p><span class="detail-item">{{ article_number_label }}:</span> {{ article_number_value }}</p>
+                {% if features_list and features_list | length > 0 %}
+                <ul class="features-list">
+                    {% for feature in features_list %}
+                    <li><span class="checkmark">✓</span>{{ feature }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% if warning_text %}
+                <div class="warning-box">
+                    <strong>{{ warning_label }}:</strong> {{ warning_text }}
+                </div>
+                {% endif %}
+                {% if color_name %}
+                <p><span class="detail-item">{{ colors_label }}:</span> {{ color_name }}</p>
+                {% endif %}
+                {% if available_sizes_value %}
+                <p><span class="detail-item">{{ sizes_label }}:</span> {{ available_sizes_value }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if product_description_long %}
+        <div class="description-section">
+            <h2 class="section-title">{{ heading_product_description }}</h2>
+            <p>{{ product_description_long }}</p>
+        </div>
+        {% endif %}
+
+        {% if image_detail1_url or image_detail2_url %}
+        <div class="detail-views-section">
+            <h2 class="section-title">{{ heading_detail_views }}</h2>
+            <div class="detail-images-grid">
+                {% if image_detail1_url %}<img src="{{ image_detail1_url }}" alt="Detailbild 1">{% endif %}
+                {% if image_detail2_url %}<img src="{{ image_detail2_url }}" alt="Detailbild 2">{% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if care_instructions %}
+        <div class="care-section">
+            <h2 class="section-title">{{ heading_care_instructions }}</h2>
+            <div class="care-instructions-grid">
+                {% for instruction in care_instructions %}
+                <div class="care-item">
+                    <img src="{{ instruction.icon_url }}" alt="Pflegesymbol">
+                    <span>{{ instruction.text }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="footer-notes">
+            {% if washing_instructions_before_first_use %}
+            <p>{{ washing_instructions_before_first_use }}</p>
+            {% endif %}
+            {% if disclaimer_text %}
+            <p><strong>{{ disclaimer_label }}:</strong> {{ disclaimer_text }}</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
