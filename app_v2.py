@@ -115,7 +115,6 @@ def extract_language_name(selected_option_with_flag: str) -> str:
 
 
 def get_html_lang_code(language_name: str) -> str:
-    # Aktualisierte Zuordnung für HTML lang-Attribut
     mapping = {
         "Englisch": "en", "Französisch": "fr", "Spanisch": "es", "Italienisch": "it",
         "Niederländisch": "nl", "Polnisch": "pl", "Portugiesisch": "pt",
@@ -142,6 +141,7 @@ def main():
 
     # Deutsche Standardtexte, die übersetzt werden sollen
     default_texts_de = {
+        "ean_code_label": "EAN",  # HINZUGEFÜGT
         "article_number_label": "Art.Nr.",
         "oeko_tex_standard_text": "OEKO-TEX® STANDARD 100",
         "oeko_tex_logo_alt_text": "OEKO-TEX Logo Platzhalter",
@@ -158,6 +158,7 @@ def main():
 
     # Produktdaten, die vom Benutzer eingegeben werden
     product_data_de = {
+        "ean_code_value": "4051512345678",  # HINZUGEFÜGT
         "article_number_value": "ART-12345",
         "warning_text_value": "Ihre volle Wirkung entfalten die suprima Hüftprotektor-Systeme nur durch den Einsatz von suprima-Protektoren!",
         "color_name_value": "Schwarz",
@@ -184,6 +185,13 @@ def main():
     product_name_de = st.text_input("Produktname (Deutsch)", value=st.session_state.get("product_name_de",
                                                                                         "suprima Protektor-Slip (ohne Protektoren)"),
                                     key="product_name_de_input")
+    ean_code_value_de = st.text_input("EAN Code", value=st.session_state.get("ean_code_value_de",
+                                                                             product_data_de["ean_code_value"]),
+                                      key="ean_code_input")  # HINZUGEFÜGT
+    article_number_value_de = st.text_input("Artikelnummer", value=st.session_state.get("article_number_value_de",
+                                                                                        product_data_de[
+                                                                                            "article_number_value"]),
+                                            key="article_number_input")
     product_description_de = st.text_area("Produktbeschreibung (Deutsch)",
                                           value=st.session_state.get("product_description_de",
                                                                      "Mit dem suprima Hüftprotektor-Slip beugen Sie effektiv Oberschenkelhalsbrüchen und Verletzungen im Falle eines Sturzes vor. Der Slip ist doté de poches de protection à droite et à gauche, qui garantissent un positionnement exact des protections de hanche."),
@@ -235,14 +243,10 @@ def main():
     st.divider()
 
     st.header("2. Zielsprache auswählen")
-    # Erweiterte Sprachliste
-    language_options_with_flags = [
-        "🇬🇧 Englisch", "🇫🇷 Französisch", "🇩🇪 Deutsch", "🇪🇸 Spanisch", "🇮🇹 Italienisch",
-        "🇳🇱 Niederländisch", "🇵🇹 Portugiesisch", "🇵🇱 Polnisch", "🇹🇷 Türkisch",
-        "🇸🇪 Schwedisch", "🇩🇰 Dänisch", "🇳🇴 Norwegisch", "🇫🇮 Finnisch", "🇮🇸 Isländisch",
-        "🇪🇪 Estnisch", "🇱🇻 Lettisch", "🇱🇹 Litauisch",
-        "🇯🇵 Japanisch", "🇨🇳 Chinesisch (vereinfacht)"
-    ]
+    language_options_with_flags = ["🇫🇷 Französisch", "🇬🇧 Englisch", "🇪🇸 Spanisch", "🇮🇹 Italienisch", "🇩🇪 Deutsch",
+                                   "🇳🇱 Niederländisch", "🇵🇹 Portugiesisch", "🇵🇱 Polnisch", "🇹🇷 Türkisch",
+                                   "🇸🇪 Schwedisch", "🇩🇰 Dänisch", "🇳🇴 Norwegisch", "🇫🇮 Finnisch", "🇮🇸 Isländisch",
+                                   "🇪🇪 Estnisch", "🇱🇻 Lettisch", "🇱🇹 Litauisch"]
     selected_target_language_with_flag = st.selectbox("Zielsprache auswählen:", options=language_options_with_flags,
                                                       key="target_language_selectbox")
 
@@ -289,20 +293,17 @@ def main():
                     time.sleep(0.5)
             translated_context["features_list"] = translated_features_list
 
-            # Standard-Labels übersetzen
             for key, text in default_texts_de.items():
-                if key != "care_instructions_list":  # Pflegehinweis-Texte werden separat behandelt
-                    trans, err = translate_text_gemini_api_call(text, source_language, actual_target_language)
-                    if err: any_errors = True
-                    translated_context[key] = trans
-                    time.sleep(0.5)
+                trans, err = translate_text_gemini_api_call(text, source_language, actual_target_language)
+                if err: any_errors = True
+                translated_context[key] = trans
+                time.sleep(0.5)
 
-            # Pflegehinweis-Texte übersetzen
             care_de_list = [f.strip() for f in care_instructions_de_str.split("\n") if f.strip()]
             translated_care_items = []
             if care_de_list:
                 default_icons = ["https://placehold.co/30x30/ffffff/000000?text=🧺",
-                                 "https://placehold.co/30x30/ffffff/000000?text=�",
+                                 "https://placehold.co/30x30/ffffff/000000?text=🚫",
                                  "https://placehold.co/30x30/ffffff/000000?text=🌡️",
                                  "https://placehold.co/30x30/ffffff/000000?text=💨",
                                  "https://placehold.co/30x30/ffffff/000000?text=뽀"]
@@ -323,7 +324,8 @@ def main():
 
             final_context = {
                 **translated_context,
-                "article_number_value": product_data_de["article_number_value"],
+                "ean_code_value": ean_code_value_de,  # HINZUGEFÜGT
+                "article_number_value": article_number_value_de,
                 "available_sizes_value": available_sizes_value_de,
                 "lang_code": get_html_lang_code(actual_target_language),
                 "image_main_url": st.session_state.image_main_data_url or 'https://placehold.co/400x400/e2e8f0/a0aec0?text=Hauptbild',

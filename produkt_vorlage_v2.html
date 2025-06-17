@@ -37,8 +37,8 @@
 
         .header-grid {
             display: grid;
-            grid-template-columns: 150px 1fr;
-            gap: 24px;
+            grid-template-columns: 180px 1fr;
+            gap: 30px;
             align-items: center;
             margin-bottom: 32px;
             padding-bottom: 24px;
@@ -53,7 +53,7 @@
         .product-header {
             font-size: 2.5em;
             font-weight: 700;
-            color: var(--brand-color); /* CORRECTED: Was --text-dark, now uses the brand color */
+            color: var(--brand-color);
             line-height: 1.2;
         }
 
@@ -241,6 +241,10 @@
                 {% endif %}
             </div>
             <div class="details-section">
+                <!-- HINZUGEFÜGT: EAN Code wird nur angezeigt, wenn ein Wert vorhanden ist -->
+                {% if ean_code_value %}
+                <p><span class="detail-item">{{ ean_code_label }}:</span> {{ ean_code_value }}</p>
+                {% endif %}
                 <p><span class="detail-item">{{ article_number_label }}:</span> {{ article_number_value }}</p>
                 {% if features_list and features_list | length > 0 %}
                 <ul class="features-list">
