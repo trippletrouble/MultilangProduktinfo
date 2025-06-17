@@ -206,6 +206,7 @@
             border: 1px solid var(--border-color);
             padding: 10px 12px;
             text-align: center;
+            vertical-align: middle;
         }
         .size-chart-table th {
             background-color: var(--bg-soft);
@@ -323,7 +324,7 @@
         </div>
         {% endif %}
 
-        <!-- HINZUGEFÜGT: Abschnitt für die dynamische Größentabelle -->
+        <!-- Abschnitt für die dynamische Größentabelle -->
         {% if size_chart %}
         <div class="size-chart-section">
             <h2 class="section-title">{{ size_chart.title }}</h2>
@@ -333,20 +334,24 @@
             <table class="size-chart-table">
                 <thead>
                     <tr>
-                        <th>Größe</th>
                         {% for header in size_chart.headers %}
                         <th>{{ header }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
-                    {% for group in size_chart.rows %}
-                    <tr>
-                        <td class="size-group-header">{{ group.size_group }}</td>
-                        {% for row_values in group.values %}
-                             <td colspan="{{ size_chart.headers | length }}">{{ row_values | join(' / ') }}</td>
+                    <!-- KORRIGIERTE SCHLEIFE -->
+                    {% for group in size_chart.groups %}
+                        {% for row_values in group.rows %}
+                            <tr>
+                                {% if loop.first %}
+                                <td rowspan="{{ group.rows | length }}" class="size-group-header">{{ group.size_category }}</td>
+                                {% endif %}
+                                {% for cell in row_values %}
+                                <td>{{ cell }}</td>
+                                {% endfor %}
+                            </tr>
                         {% endfor %}
-                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -408,7 +413,9 @@
             <p>{{ washing_instructions_before_first_use }}</p>
             {% endif %}
             {% if disclaimer_text %}
-            <p><strong>{{ disclaimer_label }}:</strong> {{ disclaimer_text }}</p>
+            <div class="disclaimer-box">
+                <strong>{{ disclaimer_label }}:</strong> {{ disclaimer_text }}
+            </div>
             {% endif %}
         </div>
     </div>

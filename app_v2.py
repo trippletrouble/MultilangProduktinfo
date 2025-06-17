@@ -80,6 +80,7 @@ def create_html_from_template(template_filename, context):
     except jinja2.TemplateNotFound:
         return f"<p>Fehler: Vorlage '{template_filename}' nicht im Verzeichnis '{template_dir}' gefunden.</p>"
     except Exception as e:
+        print(f"Fehler beim Rendern der Vorlage: {e}")  # Bessere Fehlerausgabe
         return f"<p>Fehler beim Rendern der Vorlage: {e}</p>"
 
 
@@ -142,23 +143,23 @@ def main():
     # DATEN FÜR GRÖSSENTABELLEN
     size_charts_de = {
         "Briefs": {
-            "type": "simple",  # Typ für das HTML-Rendering
+            "type": "simple",
             "title": "Maßtabelle Damen und Herren",
             "footer": "* Die suprima-Größe entspricht der Damen-Konfektionsgröße.",
-            "headers": ["suprima-Größe*", "Wäschegröße (Herren)", "Hüftumfang (cm)"],
-            "rows": [
-                # Gruppierung der Daten für eine bessere Darstellung in HTML
-                {"size_group": "S", "values": [["36", "4", "90-92"], ["38", "4", "93-96"]]},
-                {"size_group": "M", "values": [["40", "5", "97-100"], ["42", "5", "101-104"]]},
-                {"size_group": "L", "values": [["44", "6", "105-108"], ["46", "6", "109-112"]]},
-                {"size_group": "XL", "values": [["48", "7", "113-116"], ["50", "7", "117-121"]]},
-                {"size_group": "XXL", "values": [["52", "8", "122-126"], ["54", "8", "127-132"]]},
-                {"size_group": "XXXL",
-                 "values": [["56", "9", "133-138"], ["58", "9", "139-144"], ["60", "10", "145-150"]]}
+            "headers": ["Größe", "suprima-Größe*", "Wäschegröße (Herren)", "Hüftumfang (cm)"],
+            # KORRIGIERTE DATENSTRUKTUR FÜR GRUPPIERUNG
+            "groups": [
+                {"size_category": "S", "rows": [["36", "4", "90-92"], ["38", "4", "93-96"]]},
+                {"size_category": "M", "rows": [["40", "5", "97-100"], ["42", "5", "101-104"]]},
+                {"size_category": "L", "rows": [["44", "6", "105-108"], ["46", "6", "109-112"]]},
+                {"size_category": "XL", "rows": [["48", "7", "113-116"], ["50", "7", "117-121"]]},
+                {"size_category": "XXL", "rows": [["52", "8", "122-126"], ["54", "8", "127-132"]]},
+                {"size_category": "XXXL",
+                 "rows": [["56", "9", "133-138"], ["58", "9", "139-144"], ["60", "10", "145-150"]]}
             ]
         },
         "Overall": {
-            "type": "complex",  # Typ für das HTML-Rendering
+            "type": "complex",
             "title": "Maßtabelle Overalls",
             "tables": [
                 {
@@ -377,6 +378,7 @@ def main():
                 translated_chart = {
                     "type": chart_data["type"],
                     "rows": chart_data.get("rows", []),
+                    "groups": chart_data.get("groups", []),  # Für "Briefs"-Tabelle
                     "tables": []
                 }
 
