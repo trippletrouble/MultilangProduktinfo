@@ -115,11 +115,14 @@ def extract_language_name(selected_option_with_flag: str) -> str:
 
 
 def get_html_lang_code(language_name: str) -> str:
+    # Aktualisierte Zuordnung für HTML lang-Attribut
     mapping = {
         "Englisch": "en", "Französisch": "fr", "Spanisch": "es", "Italienisch": "it",
         "Niederländisch": "nl", "Polnisch": "pl", "Portugiesisch": "pt",
         "Russisch": "ru", "Japanisch": "ja", "Chinesisch (vereinfacht)": "zh-CN",
-        "Deutsch": "de"
+        "Deutsch": "de", "Türkisch": "tr", "Schwedisch": "sv", "Dänisch": "da",
+        "Norwegisch": "no", "Finnisch": "fi", "Isländisch": "is",
+        "Estnisch": "et", "Lettisch": "lv", "Litauisch": "lt"
     }
     return mapping.get(language_name, language_name[:2].lower())
 
@@ -202,11 +205,19 @@ def main():
                                                                                                  "available_sizes_value"]),
                                              key="sizes_value_input")
 
-    # KORRIGIERT: Vereinfachtes Eingabefeld für Pflegehinweise
     care_instructions_de_str = st.text_area("Pflegehinweis-Texte (jeder in eine neue Zeile)",
                                             value=st.session_state.get("care_instructions_de_str",
                                                                        "Nicht bleichen\nNicht chemisch reinigen\nWaschen 95 Grad\nNicht bügeln\nTrocknen"),
                                             height=120, key="care_instructions_de_str_input")
+
+    washing_instructions_de = st.text_input("Waschanleitung vor Erstgebrauch",
+                                            value=st.session_state.get("washing_instructions_de", default_texts_de[
+                                                "washing_instructions_before_first_use"]),
+                                            key="washing_instructions_input")
+    disclaimer_text_de = st.text_area("Haftungsausschluss (Disclaimer)",
+                                      value=st.session_state.get("disclaimer_text_de",
+                                                                 product_data_de["disclaimer_text_value"]),
+                                      key="disclaimer_text_input")
 
     st.header("Bilder hochladen")
     col1, col2, col3 = st.columns(3)
@@ -224,7 +235,14 @@ def main():
     st.divider()
 
     st.header("2. Zielsprache auswählen")
-    language_options_with_flags = ["🇫🇷 Französisch", "🇬🇧 Englisch", "🇪🇸 Spanisch", "🇮🇹 Italienisch", "🇩🇪 Deutsch"]
+    # Erweiterte Sprachliste
+    language_options_with_flags = [
+        "🇬🇧 Englisch", "🇫🇷 Französisch", "🇩🇪 Deutsch", "🇪🇸 Spanisch", "🇮🇹 Italienisch",
+        "🇳🇱 Niederländisch", "🇵🇹 Portugiesisch", "🇵🇱 Polnisch", "🇹🇷 Türkisch",
+        "🇸🇪 Schwedisch", "🇩🇰 Dänisch", "🇳🇴 Norwegisch", "🇫🇮 Finnisch", "🇮🇸 Isländisch",
+        "🇪🇪 Estnisch", "🇱🇻 Lettisch", "🇱🇹 Litauisch",
+        "🇯🇵 Japanisch", "🇨🇳 Chinesisch (vereinfacht)"
+    ]
     selected_target_language_with_flag = st.selectbox("Zielsprache auswählen:", options=language_options_with_flags,
                                                       key="target_language_selectbox")
 
@@ -248,6 +266,8 @@ def main():
                 "product_description_long": product_description_de,
                 "warning_text": warning_text_value_de,
                 "color_name": color_name_value_de,
+                "washing_instructions_before_first_use": washing_instructions_de,
+                "disclaimer_text": disclaimer_text_de,
             }
             for key, text in user_texts_to_translate.items():
                 if text.strip():
@@ -269,23 +289,30 @@ def main():
                     time.sleep(0.5)
             translated_context["features_list"] = translated_features_list
 
+            # Standard-Labels übersetzen
             for key, text in default_texts_de.items():
-                trans, err = translate_text_gemini_api_call(text, source_language, actual_target_language)
-                if err: any_errors = True
-                translated_context[key] = trans
-                time.sleep(0.5)
+                if key != "care_instructions_list":  # Pflegehinweis-Texte werden separat behandelt
+                    trans, err = translate_text_gemini_api_call(text, source_language, actual_target_language)
+                    if err: any_errors = True
+                    translated_context[key] = trans
+                    time.sleep(0.5)
 
-            # KORRIGIERT: Pflegehinweise aus dem neuen Textfeld übersetzen
+            # Pflegehinweis-Texte übersetzen
             care_de_list = [f.strip() for f in care_instructions_de_str.split("\n") if f.strip()]
             translated_care_items = []
             if care_de_list:
-                for item_text in care_de_list:
+                default_icons = ["https://placehold.co/30x30/ffffff/000000?text=🧺",
+                                 "https://placehold.co/30x30/ffffff/000000?text=�",
+                                 "https://placehold.co/30x30/ffffff/000000?text=🌡️",
+                                 "https://placehold.co/30x30/ffffff/000000?text=💨",
+                                 "https://placehold.co/30x30/ffffff/000000?text=뽀"]
+                for i, item_text in enumerate(care_de_list):
                     trans_care_text, err_care = translate_text_gemini_api_call(item_text, source_language,
                                                                                actual_target_language)
                     if err_care: any_errors = True
-                    # Für die Vorlage erstellen wir das Dictionary neu
-                    translated_care_items.append(
-                        {"icon_url": "https://placehold.co/30x30/ffffff/000000?text=🧼", "text": trans_care_text})
+                    icon = default_icons[i] if i < len(
+                        default_icons) else "https://placehold.co/30x30/ffffff/000000?text=🧼"
+                    translated_care_items.append({"icon_url": icon, "text": trans_care_text})
                     time.sleep(0.5)
             translated_context["care_instructions"] = translated_care_items
 
