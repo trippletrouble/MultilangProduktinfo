@@ -63,7 +63,6 @@
             gap: 48px;
             margin-bottom: 32px;
             padding-bottom: 32px;
-            border-bottom: 1px solid var(--border-color);
         }
 
         .image-section .product-image-main {
@@ -243,9 +242,28 @@
             line-height: 1.6;
         }
 
-        .footer-notes strong {
-            color: var(--text-light);
+        .disclaimer-box {
+            padding: 16px;
+            font-size: 0.9em;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            color: #4b5563;
+            margin-top: 16px;
         }
+
+        .disclaimer-box strong {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        /* HINZUGEFÜGT: CSS für den Seitenumbruch */
+        .page-break {
+            page-break-after: always;
+            border-bottom: 1px solid var(--border-color); /* Eine feine Linie als visueller Indikator */
+            margin-bottom: 40px;
+        }
+
 
         @media print {
             body { background-color: #fff; padding: 0; font-family: 'Poppins', sans-serif; }
@@ -253,12 +271,14 @@
             .product-header, .section-title { color: var(--brand-color) !important; }
             .header-grid, .section-title { border-bottom-color: var(--brand-color) !important; }
             .checkmark { color: var(--brand-color) !important; }
+            .page-break { border-bottom: none; } /* Keine Linie im finalen Druck */
             * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
 </head>
 <body>
     <div class="page-container">
+        <!-- SEITE 1: HAUPTINFO -->
         <header class="header-grid">
             <div class="header-logo">
                 {% if suprima_logo_url %}
@@ -307,6 +327,9 @@
             </div>
         </div>
 
+        <div class="page-break"></div>
+
+        <!-- SEITE 2: PRODUKTBESCHREIBUNG & DETAILBILDER -->
         {% if product_description_long %}
         <div class="description-section">
             <h2 class="section-title">{{ heading_product_description }}</h2>
@@ -324,23 +347,20 @@
         </div>
         {% endif %}
 
-        <!-- Abschnitt für die dynamische Größentabelle -->
+        <div class="page-break"></div>
+
+        <!-- SEITE 3: GRÖSSENTABELLE -->
         {% if size_chart %}
         <div class="size-chart-section">
             <h2 class="section-title">{{ size_chart.title }}</h2>
-
-            <!-- Einfache Tabelle für Briefs -->
             {% if size_chart.type == 'simple' %}
             <table class="size-chart-table">
                 <thead>
                     <tr>
-                        {% for header in size_chart.headers %}
-                        <th>{{ header }}</th>
-                        {% endfor %}
+                        {% for header in size_chart.headers %}<th>{{ header }}</th>{% endfor %}
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- KORRIGIERTE SCHLEIFE -->
                     {% for group in size_chart.groups %}
                         {% for row_values in group.rows %}
                             <tr>
@@ -356,8 +376,6 @@
                 </tbody>
             </table>
             {% endif %}
-
-            <!-- Komplexere Tabellen für Overalls -->
             {% if size_chart.type == 'complex' %}
                 {% for table in size_chart.tables %}
                     <div class="complex-subtitle">{{ table.subtitle }}</div>
@@ -365,35 +383,28 @@
                         {% if table.headers %}
                         <thead>
                             <tr>
-                                {% for header in table.headers %}
-                                <th>{{ header }}</th>
-                                {% endfor %}
+                                {% for header in table.headers %}<th>{{ header }}</th>{% endfor %}
                             </tr>
                         </thead>
                         {% endif %}
                         <tbody>
                             {% for row in table.rows %}
                             <tr>
-                                {% for cell in row %}
-                                <td>{{ cell }}</td>
-                                {% endfor %}
+                                {% for cell in row %}<td>{{ cell }}</td>{% endfor %}
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
-                     {% if table.title_full %}
-                        <p class="size-chart-footer">{{ table.title_full }}</p>
-                    {% endif %}
+                     {% if table.title_full %}<p class="size-chart-footer">{{ table.title_full }}</p>{% endif %}
                 {% endfor %}
             {% endif %}
-
-            {% if size_chart.footer %}
-            <p class="size-chart-footer">{{ size_chart.footer }}</p>
-            {% endif %}
+            {% if size_chart.footer %}<p class="size-chart-footer">{{ size_chart.footer }}</p>{% endif %}
         </div>
         {% endif %}
 
+        <div class="page-break"></div>
 
+        <!-- SEITE 4: PFLEGEHINWEISE & FOOTER -->
         {% if care_instructions %}
         <div class="care-section">
             <h2 class="section-title">{{ heading_care_instructions }}</h2>

@@ -80,7 +80,7 @@ def create_html_from_template(template_filename, context):
     except jinja2.TemplateNotFound:
         return f"<p>Fehler: Vorlage '{template_filename}' nicht im Verzeichnis '{template_dir}' gefunden.</p>"
     except Exception as e:
-        print(f"Fehler beim Rendern der Vorlage: {e}")  # Bessere Fehlerausgabe
+        print(f"Fehler beim Rendern der Vorlage: {e}")
         return f"<p>Fehler beim Rendern der Vorlage: {e}</p>"
 
 
@@ -109,9 +109,10 @@ def load_local_svg(filepath: str) -> str:
         return ""
 
 
-def extract_language_name(selected_option_with_flag: str) -> str:
-    if selected_option_with_flag:
-        return selected_option_with_flag.split(" ", 1)[-1]
+def extract_language_name(selected_option_with_code: str) -> str:
+    # Works for formats like "(GB) Englisch"
+    if selected_option_with_code:
+        return selected_option_with_code.split(" ", 1)[-1]
     return ""
 
 
@@ -146,8 +147,7 @@ def main():
             "type": "simple",
             "title": "Maßtabelle Damen und Herren",
             "footer": "* Die suprima-Größe entspricht der Damen-Konfektionsgröße.",
-            "headers": ["Größe", "suprima-Größe*", "Wäschegröße (Herren)", "Hüftumfang (cm)"],
-            # KORRIGIERTE DATENSTRUKTUR FÜR GRUPPIERUNG
+            "headers": ["suprima-Größe*", "Wäschegröße (Herren)", "Hüftumfang (cm)"],
             "groups": [
                 {"size_category": "S", "rows": [["36", "4", "90-92"], ["38", "4", "93-96"]]},
                 {"size_category": "M", "rows": [["40", "5", "97-100"], ["42", "5", "101-104"]]},
@@ -163,14 +163,14 @@ def main():
             "title": "Maßtabelle Overalls",
             "tables": [
                 {
-                    "subtitle": "für Sie",
+                    "subtitle": "für Damen",
                     "headers": ["S", "M", "L", "XL", "XXL"],
                     "rows": [
                         ["36/38", "40/42", "44/46", "48/50", "52/54/56"]
                     ]
                 },
                 {
-                    "subtitle": "für Ihn",
+                    "subtitle": "für Herren",
                     "headers": ["S", "M", "L", "XL", "XXL"],
                     "rows": [
                         ["44", "46/48", "50/52", "54/56", "58/60"]
@@ -204,6 +204,18 @@ def main():
         "disclaimer_label": "Warnhinweis",
     }
 
+    # HINZUGEFÜGT: Bibliothek für Pflegehinweise
+    CARE_INSTRUCTIONS_LIBRARY = [
+        {"text": "Nicht bleichen", "icon_url": "https://placehold.co/30x30/ffffff/000000?text=🚫"},
+        {"text": "Nicht chemisch reinigen", "icon_url": "https://placehold.co/30x30/ffffff/000000?text=🚫"},
+        {"text": "Waschen 95 Grad", "icon_url": "https://placehold.co/30x30/ffffff/000000?text=95"},
+        {"text": "Waschen 60 Grad", "icon_url": "https://placehold.co/30x30/ffffff/000000?text=60"},
+        {"text": "Nicht bügeln", "icon_url": "https://placehold.co/30x30/ffffff/000000?text=💨"},
+        {"text": "Trocknen", "icon_url": "https://placehold.co/30x30/ffffff/000000?text=뽀"},
+        {"text": "Nicht im Trommeltrockner trocknen", "icon_url": "https://placehold.co/30x30/ffffff/000000?text=🚫"},
+        # Weitere Anweisungen hier hinzufügen
+    ]
+
     # Produktdaten, die vom Benutzer eingegeben werden
     product_data_de = {
         "ean_code_value": "4051512345678",
@@ -219,7 +231,7 @@ def main():
         'generated_html_content': "", 'download_filename': "produktblatt.html",
         'error_message': "", 'is_loading': False,
         'image_main_data_url': "", 'image_detail1_data_url': "", 'image_detail2_data_url': "",
-        'selected_target_language_with_flag': "🇫🇷 Französisch"
+        'selected_target_language_with_code': "(FR) Französisch"
     }.items():
         if key not in st.session_state:
             st.session_state[key] = default_value
@@ -261,10 +273,14 @@ def main():
                                                                                                  "available_sizes_value"]),
                                              key="sizes_value_input")
 
-    care_instructions_de_str = st.text_area("Pflegehinweis-Texte (jeder in eine neue Zeile)",
-                                            value=st.session_state.get("care_instructions_de_str",
-                                                                       "Nicht bleichen\nNicht chemisch reinigen\nWaschen 95 Grad\nNicht bügeln\nTrocknen"),
-                                            height=120, key="care_instructions_de_str_input")
+    # HINZUGEFÜGT: Multiselect für Pflegehinweise
+    st.subheader("Pflegehinweise auswählen")
+    care_options_de = [item["text"] for item in CARE_INSTRUCTIONS_LIBRARY]
+    selected_care_instructions_de = st.multiselect(
+        "Wählen Sie die zutreffenden Pflegehinweise aus:",
+        options=care_options_de,
+        default=["Nicht bleichen", "Waschen 95 Grad"]  # Beispiel für Standardauswahl
+    )
 
     washing_instructions_de = st.text_input("Waschanleitung vor Erstgebrauch",
                                             value=st.session_state.get("washing_instructions_de", default_texts_de[
@@ -293,14 +309,14 @@ def main():
     st.header("2. Zielsprache & Optionen auswählen")
     col1_options, col2_options = st.columns(2)
     with col1_options:
-        language_options_with_flags = [
-            "🇬🇧 Englisch", "🇫🇷 Französisch", "🇩🇪 Deutsch", "🇪🇸 Spanisch", "🇮🇹 Italienisch",
-            "🇳🇱 Niederländisch", "🇵🇹 Portugiesisch", "🇵🇱 Polnisch", "🇹🇷 Türkisch",
-            "🇸🇪 Schwedisch", "🇩🇰 Dänisch", "🇳🇴 Norwegisch", "🇫🇮 Finnisch", "🇮🇸 Isländisch",
-            "🇪🇪 Estnisch", "🇱🇻 Lettisch", "🇱🇹 Litauisch",
-            "🇯🇵 Japanisch", "🇨🇳 Chinesisch (vereinfacht)"
+        language_options_with_codes = [
+            "(GB) Englisch", "(FR) Französisch", "(DE) Deutsch", "(ES) Spanisch", "(IT) Italienisch",
+            "(NL) Niederländisch", "(PT) Portugiesisch", "(PL) Polnisch", "(TR) Türkisch",
+            "(SE) Schwedisch", "(DK) Dänisch", "(NO) Norwegisch", "(FI) Finnisch", "(IS) Isländisch",
+            "(EE) Estnisch", "(LV) Lettisch", "(LT) Litauisch",
+            "(JP) Japanisch", "(CN) Chinesisch (vereinfacht)"
         ]
-        selected_target_language_with_flag = st.selectbox("Zielsprache auswählen:", options=language_options_with_flags,
+        selected_target_language_with_code = st.selectbox("Zielsprache auswählen:", options=language_options_with_codes,
                                                           key="target_language_selectbox")
     with col2_options:
         product_type = st.selectbox("Produkttyp für Größentabelle:", options=["Keine", "Briefs", "Overall"],
@@ -314,7 +330,7 @@ def main():
         st.session_state.is_loading = True
         st.session_state.error_message = ""
 
-        actual_target_language = extract_language_name(selected_target_language_with_flag)
+        actual_target_language = extract_language_name(selected_target_language_with_code)
         source_language = "Deutsch"
 
         with st.spinner("Übersetzungen werden erstellt..."):
@@ -355,22 +371,21 @@ def main():
                 translated_context[key] = trans
                 time.sleep(0.5)
 
-            care_de_list = [f.strip() for f in care_instructions_de_str.split("\n") if f.strip()]
+            # HINZUGEFÜGT: Pflegehinweise basierend auf der Multiselect-Auswahl übersetzen
             translated_care_items = []
-            if care_de_list:
-                default_icons = ["https://placehold.co/30x30/ffffff/000000?text=🧺",
-                                 "https://placehold.co/30x30/ffffff/000000?text=🚫",
-                                 "https://placehold.co/30x30/ffffff/000000?text=🌡️",
-                                 "https://placehold.co/30x30/ffffff/000000?text=💨",
-                                 "https://placehold.co/30x30/ffffff/000000?text=뽀"]
-                for i, item_text in enumerate(care_de_list):
-                    trans_care_text, err_care = translate_text_gemini_api_call(item_text, source_language,
-                                                                               actual_target_language)
-                    if err_care: any_errors = True
-                    icon = default_icons[i] if i < len(
-                        default_icons) else "https://placehold.co/30x30/ffffff/000000?text=🧼"
-                    translated_care_items.append({"icon_url": icon, "text": trans_care_text})
-                    time.sleep(0.5)
+            for selected_text in selected_care_instructions_de:
+                # Finde das passende Icon aus der Bibliothek
+                icon_url = ""
+                for item in CARE_INSTRUCTIONS_LIBRARY:
+                    if item["text"] == selected_text:
+                        icon_url = item["icon_url"]
+                        break
+
+                trans_care_text, err_care = translate_text_gemini_api_call(selected_text, source_language,
+                                                                           actual_target_language)
+                if err_care: any_errors = True
+                translated_care_items.append({"icon_url": icon_url, "text": trans_care_text})
+                time.sleep(0.5)
             translated_context["care_instructions"] = translated_care_items
 
             if product_type != "Keine":
@@ -378,7 +393,7 @@ def main():
                 translated_chart = {
                     "type": chart_data["type"],
                     "rows": chart_data.get("rows", []),
-                    "groups": chart_data.get("groups", []),  # Für "Briefs"-Tabelle
+                    "groups": chart_data.get("groups", []),
                     "tables": []
                 }
 
@@ -463,7 +478,7 @@ def main():
     st.divider()
 
     if st.session_state.generated_html_content:
-        st.subheader(f"Vorschau: Produktseite ({selected_target_language_with_flag})")
+        st.subheader(f"Vorschau: Produktseite ({selected_target_language_with_code})")
         st.components.v1.html(st.session_state.generated_html_content, height=700, scrolling=True)
         st.download_button(
             label="HTML-Seite herunterladen",
