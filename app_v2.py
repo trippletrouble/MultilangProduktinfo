@@ -191,7 +191,7 @@ def main():
                         "colors_label": "Farben", "sizes_label": "Größen",
                         "heading_product_description": "Produktbeschreibung", "heading_detail_views": "Detailansichten",
                         "heading_care_instructions": "Pflegehinweise",
-                        "washing_instructions_before_first_use": "Bitte vor dem ersten Tragen waschen.",
+                        "washing_instructions_before_first_use": "",
                         "disclaimer_label": "Warnhinweis"}
     product_data_de = {"ean_code_value": "4051512345678", "article_number_value": "ART-12345",
                        "warning_text_value": "Ihre volle Wirkung entfalten die suprima Hüftprotektor-Systeme nur durch den Einsatz von suprima-Protektoren!",
