@@ -115,16 +115,13 @@ def extract_language_name(selected_option_with_code: str) -> str:
 
 
 def get_html_lang_code(language_name: str) -> str:
-    # GEÄNDERT: Neue Sprachen hinzugefügt
     mapping = {
         "Englisch": "en", "Französisch": "fr", "Spanisch": "es", "Italienisch": "it",
         "Niederländisch": "nl", "Polnisch": "pl", "Portugiesisch": "pt",
         "Russisch": "ru", "Japanisch": "ja", "Chinesisch (vereinfacht)": "zh-CN",
         "Deutsch": "de", "Türkisch": "tr", "Schwedisch": "sv", "Dänisch": "da",
         "Norwegisch": "no", "Finnisch": "fi", "Isländisch": "is",
-        "Estnisch": "et", "Lettisch": "lv", "Litauisch": "lt",
-        "Griechisch": "el", "Tschechisch": "cs", "Rumänisch": "ro", "Ungarisch": "hu",
-        "Slowakisch": "sk", "Slowenisch": "sl", "Serbisch": "sr", "Kroatisch": "hr"
+        "Estnisch": "et", "Lettisch": "lv", "Litauisch": "lt"
     }
     return mapping.get(language_name, language_name[:2].lower())
 
@@ -142,7 +139,28 @@ def main():
 
     st.divider()
 
-    # DATEN FÜR GRÖSSENTABELLEN
+    # --- DATEN-BIBLIOTHEKEN ---
+    CARE_INSTRUCTIONS_LIBRARY = [
+        {"text": "Waschen 30 Grad", "icon_filename": "waschen_30_grad59c8af44.svg"},
+        {"text": "Waschen 40 Grad", "icon_filename": "waschen_40_grad.svg"},
+        {"text": "Waschen 60 Grad", "icon_filename": "waschen60.svg"},
+        {"text": "Waschen 95 Grad", "icon_filename": "waschen_95_grad.svg"},
+        {"text": "Handwäsche", "icon_filename": "handwaesche.svg"},
+        {"text": "Nicht bleichen", "icon_filename": "bleichenNein.svg"},
+        {"text": "Nicht bügeln", "icon_filename": "nicht_buegeln.svg"},
+        {"text": "Mäßig heiss bügeln", "icon_filename": "maessig_Buegeln.svg"},
+        {"text": "Heiss bügeln", "icon_filename": "buegeln_normal.svg"},
+        {"text": "Chemisch reinigen", "icon_filename": "chemisch_reinigen.svg"},
+        {"text": "Nicht chemisch reinigen", "icon_filename": "chemischNein.svg"},
+        {"text": "Schonend reinigen", "icon_filename": "schonend_reinigen.svg"},
+        {"text": "Trocknen", "icon_filename": "trocknen.svg"},
+        {"text": "Nicht im Trommeltrockner trocknen", "icon_filename": "Nicht_trocknen59c51c3e49.svg"},
+        {"text": "Schonend trocknen", "icon_filename": "trockner1.svg"},
+        {"text": "Nicht schleudern", "icon_filename": "nicht-schleudern.svg"},
+        {"text": "Keinen Weichspüler verwenden", "icon_filename": "kein_weichspu-ler.svg"},
+        {"text": "Abwischbar", "icon_filename": "abwischbar.svg"},
+        {"text": "Protektor entfernen", "icon_filename": "protektor-entfernen.svg"},
+    ]
     size_charts_de = {
         "Briefs": {
             "type": "simple", "title": "Maßtabelle Damen und Herren",
@@ -166,8 +184,6 @@ def main():
                         "rows": [["110/116", "122/128", "134/140", "146/152", "158/164"]]}]
         }
     }
-
-    # Deutsche Standardtexte, die übersetzt werden sollen
     default_texts_de = {"article_number_label": "Art.Nr.", "ean_code_label": "EAN",
                         "oeko_tex_standard_text": "OEKO-TEX® STANDARD 100",
                         "oeko_tex_logo_alt_text": "OEKO-TEX Logo Platzhalter",
@@ -181,26 +197,6 @@ def main():
                        "warning_text_value": "Ihre volle Wirkung entfalten die suprima Hüftprotektor-Systeme nur durch den Einsatz von suprima-Protektoren!",
                        "color_name_value": "Schwarz", "available_sizes_value": "S M L",
                        "disclaimer_text_value": "Hüftprotektoren können nicht in jedem Fall Sturzverletzungen verhindern. Jegliche Haftung ist deshalb ausgeschlossen."}
-    CARE_INSTRUCTIONS_LIBRARY = [{"text": "Waschen 30 Grad", "icon_filename": "waschen_30_grad59c8af44.svg"},
-                                 {"text": "Waschen 40 Grad", "icon_filename": "waschen_40_grad.svg"},
-                                 {"text": "Waschen 60 Grad", "icon_filename": "waschen60.svg"},
-                                 {"text": "Waschen 95 Grad", "icon_filename": "waschen_95_grad.svg"},
-                                 {"text": "Handwäsche", "icon_filename": "handwaesche.svg"},
-                                 {"text": "Nicht bleichen", "icon_filename": "bleichenNein.svg"},
-                                 {"text": "Nicht bügeln", "icon_filename": "nicht_buegeln.svg"},
-                                 {"text": "Mäßig heiss bügeln", "icon_filename": "maessig_Buegeln.svg"},
-                                 {"text": "Heiss bügeln", "icon_filename": "buegeln_normal.svg"},
-                                 {"text": "Chemisch reinigen", "icon_filename": "chemisch_reinigen.svg"},
-                                 {"text": "Nicht chemisch reinigen", "icon_filename": "chemischNein.svg"},
-                                 {"text": "Schonend reinigen", "icon_filename": "schonend_reinigen.svg"},
-                                 {"text": "Trocknen", "icon_filename": "trocknen.svg"},
-                                 {"text": "Nicht im Trommeltrockner trocknen",
-                                  "icon_filename": "Nicht_trocknen59c51c3e49.svg"},
-                                 {"text": "Schonend trocknen", "icon_filename": "trockner1.svg"},
-                                 {"text": "Nicht schleudern", "icon_filename": "nicht-schleudern.svg"},
-                                 {"text": "Keinen Weichspüler verwenden", "icon_filename": "kein_weichspu-ler.svg"},
-                                 {"text": "Abwischbar", "icon_filename": "abwischbar.svg"},
-                                 {"text": "Protektor entfernen", "icon_filename": "protektor-entfernen.svg"}]
 
     # Session State initialisieren
     for key, default_value in {'generated_html_content': "", 'download_filename': "produktblatt.html",
@@ -254,16 +250,11 @@ def main():
     st.header("2. Zielsprache & Optionen auswählen")
     col1_options, col2_options = st.columns(2)
     with col1_options:
-        # GEÄNDERT: Erweiterte Sprachliste
-        language_options_with_codes = [
-            "(GB) Englisch", "(FR) Französisch", "(DE) Deutsch", "(ES) Spanisch", "(IT) Italienisch",
-            "(NL) Niederländisch", "(PT) Portugiesisch", "(PL) Polnisch", "(TR) Türkisch",
-            "(SE) Schwedisch", "(DK) Dänisch", "(NO) Norwegisch", "(FI) Finnisch", "(IS) Isländisch",
-            "(EE) Estnisch", "(LV) Lettisch", "(LT) Litauisch",
-            "(GR) Griechisch", "(CZ) Tschechisch", "(RO) Rumänisch", "(HU) Ungarisch",
-            "(SK) Slowakisch", "(SI) Slowenisch", "(RS) Serbisch", "(HR) Kroatisch",
-            "(JP) Japanisch", "(CN) Chinesisch (vereinfacht)"
-        ]
+        language_options_with_codes = ["(GB) Englisch", "(FR) Französisch", "(DE) Deutsch", "(ES) Spanisch",
+                                       "(IT) Italienisch", "(NL) Niederländisch", "(PT) Portugiesisch", "(PL) Polnisch",
+                                       "(TR) Türkisch", "(SE) Schwedisch", "(DK) Dänisch", "(NO) Norwegisch",
+                                       "(FI) Finnisch", "(IS) Isländisch", "(EE) Estnisch", "(LV) Lettisch",
+                                       "(LT) Litauisch", "(JP) Japanisch", "(CN) Chinesisch (vereinfacht)"]
         selected_target_language_with_code = st.selectbox("Zielsprache auswählen:", options=language_options_with_codes,
                                                           key="target_language_selectbox")
     with col2_options:
@@ -325,6 +316,7 @@ def main():
                                                                            actual_target_language)
                 if err_care: any_errors = True
                 if icon_filename:
+                    # KORRIGIERT: Verweist jetzt auf das Verzeichnis 'waschlabellen'
                     icon_data_url = load_local_svg(f"waschlabellen/{icon_filename}")
                     translated_care_items.append({"icon_url": icon_data_url, "text": trans_care_text})
                 time.sleep(0.5)
