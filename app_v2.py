@@ -317,7 +317,7 @@ def main():
                 if err_care: any_errors = True
                 if icon_filename:
                     # KORRIGIERT: Verweist jetzt auf das Verzeichnis 'waschlabellen'
-                    icon_data_url = load_local_svg(f"waschlabellen/{icon_filename}")
+                    icon_data_url = load_local_svg(f"Waschlabellen/{icon_filename}")
                     translated_care_items.append({"icon_url": icon_data_url, "text": trans_care_text})
                 time.sleep(0.5)
             translated_context["care_instructions"] = translated_care_items
