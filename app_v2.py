@@ -98,19 +98,17 @@ def get_image_data_url(uploaded_file):
 
 
 def load_local_svg(filepath: str) -> str:
-    """Lädt eine lokale SVG-Datei und kodiert sie als Base64 Data URL."""
     try:
         with open(filepath, "rb") as f:
             contents = f.read()
         b64_str = base64.b64encode(contents).decode("utf-8")
         return f"data:image/svg+xml;base64,{b64_str}"
     except FileNotFoundError:
-        st.error(f"Logo-Datei nicht gefunden unter: {filepath}")
+        st.error(f"Datei nicht gefunden: {filepath}")
         return ""
 
 
 def extract_language_name(selected_option_with_code: str) -> str:
-    # Works for formats like "(GB) Englisch"
     if selected_option_with_code:
         return selected_option_with_code.split(" ", 1)[-1]
     return ""
@@ -141,155 +139,98 @@ def main():
 
     st.divider()
 
-    # DATEN FÜR GRÖSSENTABELLEN
+    # --- DATEN-BIBLIOTHEKEN ---
+    CARE_INSTRUCTIONS_LIBRARY = [
+        {"text": "Waschen 30 Grad", "icon_filename": "waschen_30_grad59c8af44.svg"},
+        {"text": "Waschen 40 Grad", "icon_filename": "waschen_40_grad.svg"},
+        {"text": "Waschen 60 Grad", "icon_filename": "waschen60.svg"},
+        {"text": "Waschen 95 Grad", "icon_filename": "waschen_95_grad.svg"},
+        {"text": "Handwäsche", "icon_filename": "handwaesche.svg"},
+        {"text": "Nicht bleichen", "icon_filename": "bleichenNein.svg"},
+        {"text": "Nicht bügeln", "icon_filename": "nicht_buegeln.svg"},
+        {"text": "Mäßig heiss bügeln", "icon_filename": "maessig_Buegeln.svg"},
+        {"text": "Heiss bügeln", "icon_filename": "buegeln_normal.svg"},
+        {"text": "Chemisch reinigen", "icon_filename": "chemisch_reinigen.svg"},
+        {"text": "Nicht chemisch reinigen", "icon_filename": "chemischNein.svg"},
+        {"text": "Schonend reinigen", "icon_filename": "schonend_reinigen.svg"},
+        {"text": "Trocknen", "icon_filename": "trocknen.svg"},
+        {"text": "Nicht im Trommeltrockner trocknen", "icon_filename": "Nicht_trocknen59c51c3e49.svg"},
+        {"text": "Schonend trocknen", "icon_filename": "trockner1.svg"},
+        {"text": "Nicht schleudern", "icon_filename": "nicht-schleudern.svg"},
+        {"text": "Keinen Weichspüler verwenden", "icon_filename": "kein_weichspu-ler.svg"},
+        {"text": "Abwischbar", "icon_filename": "abwischbar.svg"},
+        {"text": "Protektor entfernen", "icon_filename": "protektor-entfernen.svg"},
+    ]
     size_charts_de = {
         "Briefs": {
-            "type": "simple",
-            "title": "Maßtabelle Damen und Herren",
+            "type": "simple", "title": "Maßtabelle Damen und Herren",
             "footer": "* Die suprima-Größe entspricht der Damen-Konfektionsgröße.",
-            "headers": ["suprima-Größe*", "Wäschegröße (Herren)", "Hüftumfang (cm)"],
-            "groups": [
-                {"size_category": "S", "rows": [["36", "4", "90-92"], ["38", "4", "93-96"]]},
-                {"size_category": "M", "rows": [["40", "5", "97-100"], ["42", "5", "101-104"]]},
-                {"size_category": "L", "rows": [["44", "6", "105-108"], ["46", "6", "109-112"]]},
-                {"size_category": "XL", "rows": [["48", "7", "113-116"], ["50", "7", "117-121"]]},
-                {"size_category": "XXL", "rows": [["52", "8", "122-126"], ["54", "8", "127-132"]]},
-                {"size_category": "XXXL",
-                 "rows": [["56", "9", "133-138"], ["58", "9", "139-144"], ["60", "10", "145-150"]]}
-            ]
+            "headers": ["Größe", "suprima-Größe*", "Wäschegröße (Herren)", "Hüftumfang (cm)"],
+            "groups": [{"size_category": "S", "rows": [["36", "4", "90-92"], ["38", "4", "93-96"]]},
+                       {"size_category": "M", "rows": [["40", "5", "97-100"], ["42", "5", "101-104"]]},
+                       {"size_category": "L", "rows": [["44", "6", "105-108"], ["46", "6", "109-112"]]},
+                       {"size_category": "XL", "rows": [["48", "7", "113-116"], ["50", "7", "117-121"]]},
+                       {"size_category": "XXL", "rows": [["52", "8", "122-126"], ["54", "8", "127-132"]]},
+                       {"size_category": "XXXL",
+                        "rows": [["56", "9", "133-138"], ["58", "9", "139-144"], ["60", "10", "145-150"]]}]
         },
         "Overall": {
-            "type": "complex",
-            "title": "Maßtabelle Overalls",
-            "tables": [
-                {
-                    "subtitle": "für Damen",
-                    "headers": ["S", "M", "L", "XL", "XXL"],
-                    "rows": [
-                        ["36/38", "40/42", "44/46", "48/50", "52/54/56"]
-                    ]
-                },
-                {
-                    "subtitle": "für Herren",
-                    "headers": ["S", "M", "L", "XL", "XXL"],
-                    "rows": [
-                        ["44", "46/48", "50/52", "54/56", "58/60"]
-                    ]
-                },
-                {
-                    "subtitle": "für Kinder",
-                    "title_full": "Angaben entsprechen der Körpergröße des Kindes",
-                    "rows": [
-                        ["110/116", "122/128", "134/140", "146/152", "158/164"]
-                    ]
-                }
-            ]
+            "type": "complex", "title": "Maßtabelle Overalls",
+            "tables": [{"subtitle": "für Damen", "headers": ["S", "M", "L", "XL", "XXL"],
+                        "rows": [["36/38", "40/42", "44/46", "48/50", "52/54/56"]]},
+                       {"subtitle": "für Herren", "headers": ["S", "M", "L", "XL", "XXL"],
+                        "rows": [["44", "46/48", "50/52", "54/56", "58/60"]]},
+                       {"subtitle": "für Kinder", "title_full": "Angaben entsprechen der Körpergröße des Kindes",
+                        "rows": [["110/116", "122/128", "134/140", "146/152", "158/164"]]}]
         }
     }
+    default_texts_de = {"article_number_label": "Art.Nr.", "ean_code_label": "EAN",
+                        "oeko_tex_standard_text": "OEKO-TEX® STANDARD 100",
+                        "oeko_tex_logo_alt_text": "OEKO-TEX Logo Platzhalter",
+                        "oeko_tex_tested_text": "Geprüft auf Schadstoffe.", "warning_label": "ACHTUNG",
+                        "colors_label": "Farben", "sizes_label": "Größen",
+                        "heading_product_description": "Produktbeschreibung", "heading_detail_views": "Detailansichten",
+                        "heading_care_instructions": "Pflegehinweise",
+                        "washing_instructions_before_first_use": "Bitte vor dem ersten Tragen waschen.",
+                        "disclaimer_label": "Warnhinweis"}
+    product_data_de = {"ean_code_value": "4051512345678", "article_number_value": "ART-12345",
+                       "warning_text_value": "Ihre volle Wirkung entfalten die suprima Hüftprotektor-Systeme nur durch den Einsatz von suprima-Protektoren!",
+                       "color_name_value": "Schwarz", "available_sizes_value": "S M L",
+                       "disclaimer_text_value": "Hüftprotektoren können nicht in jedem Fall Sturzverletzungen verhindern. Jegliche Haftung ist deshalb ausgeschlossen."}
 
-    # Deutsche Standardtexte, die übersetzt werden sollen
-    default_texts_de = {
-        "article_number_label": "Art.Nr.",
-        "ean_code_label": "EAN",
-        "oeko_tex_standard_text": "OEKO-TEX® STANDARD 100",
-        "oeko_tex_logo_alt_text": "OEKO-TEX Logo Platzhalter",
-        "oeko_tex_tested_text": "Geprüft auf Schadstoffe.",
-        "warning_label": "ACHTUNG",
-        "colors_label": "Farben",
-        "sizes_label": "Größen",
-        "heading_product_description": "Produktbeschreibung",
-        "heading_detail_views": "Detailansichten",
-        "heading_care_instructions": "Pflegehinweise",
-        "washing_instructions_before_first_use": "Bitte vor dem ersten Tragen waschen.",
-        "disclaimer_label": "Warnhinweis",
-    }
+    # Session State initialisieren
+    for key, default_value in {'generated_html_content': "", 'download_filename': "produktblatt.html",
+                               'error_message': "", 'is_loading': False, 'image_main_data_url': "",
+                               'image_detail1_data_url': "", 'image_detail2_data_url': "",
+                               'selected_target_language_with_code': "(FR) Französisch"}.items():
+        if key not in st.session_state: st.session_state[key] = default_value
+    if 'suprima_logo_data_url' not in st.session_state: st.session_state.suprima_logo_data_url = load_local_svg(
+        "logo-3.svg")
 
-    # HINZUGEFÜGT: Bibliothek für Pflegehinweise
-    CARE_INSTRUCTIONS_LIBRARY = [
-        {"text": "Nicht bleichen", "icon_url": "https://placehold.co/30x30/ffffff/000000?text=🚫"},
-        {"text": "Nicht chemisch reinigen", "icon_url": "https://placehold.co/30x30/ffffff/000000?text=🚫"},
-        {"text": "Waschen 95 Grad", "icon_url": "https://placehold.co/30x30/ffffff/000000?text=95"},
-        {"text": "Waschen 60 Grad", "icon_url": "https://placehold.co/30x30/ffffff/000000?text=60"},
-        {"text": "Nicht bügeln", "icon_url": "https://placehold.co/30x30/ffffff/000000?text=💨"},
-        {"text": "Trocknen", "icon_url": "https://placehold.co/30x30/ffffff/000000?text=뽀"},
-        {"text": "Nicht im Trommeltrockner trocknen", "icon_url": "https://placehold.co/30x30/ffffff/000000?text=🚫"},
-        # Weitere Anweisungen hier hinzufügen
-    ]
-
-    # Produktdaten, die vom Benutzer eingegeben werden
-    product_data_de = {
-        "ean_code_value": "4051512345678",
-        "article_number_value": "ART-12345",
-        "warning_text_value": "Ihre volle Wirkung entfalten die suprima Hüftprotektor-Systeme nur durch den Einsatz von suprima-Protektoren!",
-        "color_name_value": "Schwarz",
-        "available_sizes_value": "S M L",
-        "disclaimer_text_value": "Hüftprotektoren können nicht in jedem Fall Sturzverletzungen verhindern. Jegliche Haftung ist deshalb ausgeschlossen."
-    }
-
-    # Initialisiere Session State
-    for key, default_value in {
-        'generated_html_content': "", 'download_filename': "produktblatt.html",
-        'error_message': "", 'is_loading': False,
-        'image_main_data_url': "", 'image_detail1_data_url': "", 'image_detail2_data_url': "",
-        'selected_target_language_with_code': "(FR) Französisch"
-    }.items():
-        if key not in st.session_state:
-            st.session_state[key] = default_value
-
-    if 'suprima_logo_data_url' not in st.session_state:
-        st.session_state.suprima_logo_data_url = load_local_svg("logo-3.svg")
-
-    # UI für die Eingabe
+    # --- UI für die Eingabe ---
     st.header("1. Produktinformationen eingeben")
 
-    product_name_de = st.text_input("Produktname (Deutsch)", value=st.session_state.get("product_name_de",
-                                                                                        "suprima Protektor-Slip (ohne Protektoren)"),
-                                    key="product_name_de_input")
-    ean_code_value_de = st.text_input("EAN Code", value=st.session_state.get("ean_code_value_de",
-                                                                             product_data_de.get("ean_code_value", "")),
-                                      key="ean_code_input")
-    article_number_value_de = st.text_input("Artikelnummer", value=st.session_state.get("article_number_value_de",
-                                                                                        product_data_de[
-                                                                                            "article_number_value"]),
-                                            key="article_number_input")
+    product_name_de = st.text_input("Produktname (Deutsch)", "suprima Protektor-Slip (ohne Protektoren)")
+    ean_code_value_de = st.text_input("EAN Code", product_data_de.get("ean_code_value", ""))
+    article_number_value_de = st.text_input("Artikelnummer", product_data_de["article_number_value"])
     product_description_de = st.text_area("Produktbeschreibung (Deutsch)",
-                                          value=st.session_state.get("product_description_de",
-                                                                     "Mit dem suprima Hüftprotektor-Slip beugen Sie effektiv Oberschenkelhalsbrüchen und Verletzungen im Falle eines Sturzes vor. Der Slip ist doté de poches de protection à droite et à gauche, qui garantissent un positionnement exact des protections de hanche."),
-                                          height=100, key="product_description_de_input")
+                                          "Mit dem suprima Hüftprotektor-Slip beugen Sie effektiv Oberschenkelhalsbrüchen und Verletzungen im Falle eines Sturzes vor. Der Slip ist doté de poches de protection à droite et à gauche, qui garantissent un positionnement exact des protections de hanche.",
+                                          height=100)
     product_features_de_str = st.text_area("Merkmale (jedes in eine neue Zeile)",
-                                           value=st.session_state.get("product_features_de_str",
-                                                                      "schützt den Oberschenkelhals\nvermeidet Sturzverletzungen\nhoher Tragekomfort\nbequem im Liegen"),
-                                           height=100, key="product_features_de_str_input")
-    warning_text_value_de = st.text_area("Warnhinweis Text (Attention)",
-                                         value=st.session_state.get("warning_text_value_de",
-                                                                    product_data_de["warning_text_value"]),
-                                         key="warn_text_val_input")
-    color_name_value_de = st.text_input("Farbbezeichnung(en)", value=st.session_state.get("color_name_value_de",
-                                                                                          product_data_de[
-                                                                                              "color_name_value"]),
-                                        key="color_name_input")
-    available_sizes_value_de = st.text_input("Verfügbare Größen", value=st.session_state.get("available_sizes_value_de",
-                                                                                             product_data_de[
-                                                                                                 "available_sizes_value"]),
-                                             key="sizes_value_input")
+                                           "schützt den Oberschenkelhals\nvermeidet Sturzverletzungen\nhoher Tragekomfort\nbequem im Liegen",
+                                           height=100)
+    warning_text_value_de = st.text_area("Warnhinweis Text (Attention)", product_data_de["warning_text_value"])
+    color_name_value_de = st.text_input("Farbbezeichnung(en)", product_data_de["color_name_value"])
+    available_sizes_value_de = st.text_input("Verfügbare Größen", product_data_de["available_sizes_value"])
 
-    # HINZUGEFÜGT: Multiselect für Pflegehinweise
-    st.subheader("Pflegehinweise auswählen")
     care_options_de = [item["text"] for item in CARE_INSTRUCTIONS_LIBRARY]
-    selected_care_instructions_de = st.multiselect(
-        "Wählen Sie die zutreffenden Pflegehinweise aus:",
-        options=care_options_de,
-        default=["Nicht bleichen", "Waschen 95 Grad"]  # Beispiel für Standardauswahl
-    )
+    selected_care_instructions_de = st.multiselect("Pflegehinweise auswählen:", options=care_options_de,
+                                                   default=["Nicht bleichen", "Waschen 95 Grad", "Nicht bügeln",
+                                                            "Trocknen", "Nicht chemisch reinigen"])
 
     washing_instructions_de = st.text_input("Waschanleitung vor Erstgebrauch",
-                                            value=st.session_state.get("washing_instructions_de", default_texts_de[
-                                                "washing_instructions_before_first_use"]),
-                                            key="washing_instructions_input")
-    disclaimer_text_de = st.text_area("Haftungsausschluss (Disclaimer)",
-                                      value=st.session_state.get("disclaimer_text_de",
-                                                                 product_data_de["disclaimer_text_value"]),
-                                      key="disclaimer_text_input")
+                                            default_texts_de["washing_instructions_before_first_use"])
+    disclaimer_text_de = st.text_area("Haftungsausschluss (Disclaimer)", product_data_de["disclaimer_text_value"])
 
     st.header("Bilder hochladen")
     col1, col2, col3 = st.columns(3)
@@ -309,13 +250,11 @@ def main():
     st.header("2. Zielsprache & Optionen auswählen")
     col1_options, col2_options = st.columns(2)
     with col1_options:
-        language_options_with_codes = [
-            "(GB) Englisch", "(FR) Französisch", "(DE) Deutsch", "(ES) Spanisch", "(IT) Italienisch",
-            "(NL) Niederländisch", "(PT) Portugiesisch", "(PL) Polnisch", "(TR) Türkisch",
-            "(SE) Schwedisch", "(DK) Dänisch", "(NO) Norwegisch", "(FI) Finnisch", "(IS) Isländisch",
-            "(EE) Estnisch", "(LV) Lettisch", "(LT) Litauisch",
-            "(JP) Japanisch", "(CN) Chinesisch (vereinfacht)"
-        ]
+        language_options_with_codes = ["(GB) Englisch", "(FR) Französisch", "(DE) Deutsch", "(ES) Spanisch",
+                                       "(IT) Italienisch", "(NL) Niederländisch", "(PT) Portugiesisch", "(PL) Polnisch",
+                                       "(TR) Türkisch", "(SE) Schwedisch", "(DK) Dänisch", "(NO) Norwegisch",
+                                       "(FI) Finnisch", "(IS) Isländisch", "(EE) Estnisch", "(LV) Lettisch",
+                                       "(LT) Litauisch", "(JP) Japanisch", "(CN) Chinesisch (vereinfacht)"]
         selected_target_language_with_code = st.selectbox("Zielsprache auswählen:", options=language_options_with_codes,
                                                           key="target_language_selectbox")
     with col2_options:
@@ -337,14 +276,11 @@ def main():
             translated_context = {}
             any_errors = False
 
-            user_texts_to_translate = {
-                "product_name": product_name_de,
-                "product_description_long": product_description_de,
-                "warning_text": warning_text_value_de,
-                "color_name": color_name_value_de,
-                "washing_instructions_before_first_use": washing_instructions_de,
-                "disclaimer_text": disclaimer_text_de,
-            }
+            user_texts_to_translate = {"product_name": product_name_de,
+                                       "product_description_long": product_description_de,
+                                       "warning_text": warning_text_value_de, "color_name": color_name_value_de,
+                                       "washing_instructions_before_first_use": washing_instructions_de,
+                                       "disclaimer_text": disclaimer_text_de}
             for key, text in user_texts_to_translate.items():
                 if text.strip():
                     trans, err = translate_text_gemini_api_call(text, source_language, actual_target_language)
@@ -371,55 +307,40 @@ def main():
                 translated_context[key] = trans
                 time.sleep(0.5)
 
-            # HINZUGEFÜGT: Pflegehinweise basierend auf der Multiselect-Auswahl übersetzen
             translated_care_items = []
             for selected_text in selected_care_instructions_de:
-                # Finde das passende Icon aus der Bibliothek
-                icon_url = ""
-                for item in CARE_INSTRUCTIONS_LIBRARY:
-                    if item["text"] == selected_text:
-                        icon_url = item["icon_url"]
-                        break
-
+                icon_filename = next(
+                    (item["icon_filename"] for item in CARE_INSTRUCTIONS_LIBRARY if item["text"] == selected_text),
+                    None)
                 trans_care_text, err_care = translate_text_gemini_api_call(selected_text, source_language,
                                                                            actual_target_language)
                 if err_care: any_errors = True
-                translated_care_items.append({"icon_url": icon_url, "text": trans_care_text})
+                if icon_filename:
+                    # KORRIGIERT: Verweist jetzt auf das Verzeichnis 'waschlabellen'
+                    icon_data_url = load_local_svg(f"Waschlabellen/{icon_filename}")
+                    translated_care_items.append({"icon_url": icon_data_url, "text": trans_care_text})
                 time.sleep(0.5)
             translated_context["care_instructions"] = translated_care_items
 
             if product_type != "Keine":
                 chart_data = size_charts_de[product_type]
-                translated_chart = {
-                    "type": chart_data["type"],
-                    "rows": chart_data.get("rows", []),
-                    "groups": chart_data.get("groups", []),
-                    "tables": []
-                }
-
+                translated_chart = {"type": chart_data["type"], "rows": chart_data.get("rows", []),
+                                    "groups": chart_data.get("groups", []), "tables": []}
                 trans_title, err_title = translate_text_gemini_api_call(chart_data["title"], source_language,
                                                                         actual_target_language);
                 time.sleep(0.5)
                 translated_chart["title"] = trans_title
                 if err_title: any_errors = True
-
                 if "footer" in chart_data:
                     trans_footer, err_footer = translate_text_gemini_api_call(chart_data["footer"], source_language,
                                                                               actual_target_language);
                     time.sleep(0.5)
                     translated_chart["footer"] = trans_footer
                     if err_footer: any_errors = True
-
                 if "headers" in chart_data:
-                    translated_headers = []
-                    for header in chart_data["headers"]:
-                        trans_header, err_header = translate_text_gemini_api_call(header, source_language,
-                                                                                  actual_target_language);
-                        time.sleep(0.5)
-                        translated_headers.append(trans_header)
-                        if err_header: any_errors = True
+                    translated_headers = [translate_text_gemini_api_call(h, source_language, actual_target_language)[0]
+                                          for h in chart_data["headers"]]
                     translated_chart["headers"] = translated_headers
-
                 if "tables" in chart_data:
                     for sub_table_data in chart_data["tables"]:
                         translated_sub_table = {"rows": sub_table_data["rows"]}
@@ -442,25 +363,21 @@ def main():
                                 sub_table_data["headers"]]
                             translated_sub_table["headers"] = translated_sub_headers
                         translated_chart["tables"].append(translated_sub_table)
-
                 translated_context["size_chart"] = translated_chart
 
             if any_errors:
-                st.session_state.error_message = "Einige Texte konnten nicht übersetzt werden. Bitte überprüfen Sie die Ausgabe."
+                st.session_state.error_message = "Einige Texte konnten nicht übersetzt werden."
             else:
                 st.session_state.error_message = "Übersetzung erfolgreich!"
 
-            final_context = {
-                **translated_context,
-                "ean_code_value": ean_code_value_de,
-                "article_number_value": article_number_value_de,
-                "available_sizes_value": available_sizes_value_de,
-                "lang_code": get_html_lang_code(actual_target_language),
-                "image_main_url": st.session_state.image_main_data_url or 'https://placehold.co/400x400/e2e8f0/a0aec0?text=Hauptbild',
-                "image_detail1_url": st.session_state.image_detail1_data_url or 'https://placehold.co/300x200/e2e8f0/a0aec0?text=Detail+1',
-                "image_detail2_url": st.session_state.image_detail2_data_url or 'https://placehold.co/300x200/e2e8f0/a0aec0?text=Detail+2',
-                "suprima_logo_url": st.session_state.suprima_logo_data_url,
-            }
+            final_context = {**translated_context, "ean_code_value": ean_code_value_de,
+                             "article_number_value": article_number_value_de,
+                             "available_sizes_value": available_sizes_value_de,
+                             "lang_code": get_html_lang_code(actual_target_language),
+                             "image_main_url": st.session_state.image_main_data_url or 'https://placehold.co/400x400/e2e8f0/a0aec0?text=Hauptbild',
+                             "image_detail1_url": st.session_state.image_detail1_data_url or 'https://placehold.co/300x200/e2e8f0/a0aec0?text=Detail+1',
+                             "image_detail2_url": st.session_state.image_detail2_data_url or 'https://placehold.co/300x200/e2e8f0/a0aec0?text=Detail+2',
+                             "suprima_logo_url": st.session_state.suprima_logo_data_url}
 
             template_file = "produkt_vorlage_v2.html"
             st.session_state.generated_html_content = create_html_from_template(template_file, final_context)
@@ -480,13 +397,8 @@ def main():
     if st.session_state.generated_html_content:
         st.subheader(f"Vorschau: Produktseite ({selected_target_language_with_code})")
         st.components.v1.html(st.session_state.generated_html_content, height=700, scrolling=True)
-        st.download_button(
-            label="HTML-Seite herunterladen",
-            data=st.session_state.generated_html_content,
-            file_name=st.session_state.download_filename,
-            mime="text/html",
-            key="download_button"
-        )
+        st.download_button(label="HTML-Seite herunterladen", data=st.session_state.generated_html_content,
+                           file_name=st.session_state.download_filename, mime="text/html", key="download_button")
 
 
 if __name__ == "__main__":
