@@ -2,3 +2,5 @@ streamlit
 requests
 python-dotenv
 jinja2
+deepl
+re
