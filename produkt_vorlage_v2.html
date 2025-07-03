@@ -20,7 +20,7 @@
             color: var(--text-light);
             background-color: var(--bg-soft);
             margin: 0;
-            padding: 24px;
+            padding: 16px; /* Angepasst für mobile Geräte */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
@@ -29,7 +29,7 @@
             max-width: 900px;
             margin: 0 auto;
             background-color: #fff;
-            padding: 48px;
+            padding: 24px; /* Angepasst für mobile Geräte */
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05), 0 4px 10px rgba(0,0,0,0.02);
             border: 1px solid var(--border-color);
@@ -37,8 +37,8 @@
 
         .header-grid {
             display: grid;
-            grid-template-columns: 180px 1fr;
-            gap: 30px;
+            grid-template-columns: 250px 1fr;
+            gap: 40px;
             align-items: center;
             margin-bottom: 32px;
             padding-bottom: 24px;
@@ -51,10 +51,10 @@
         }
 
         .product-header {
-            font-size: 2.5em;
+            font-size: 2.1em;
             font-weight: 700;
             color: var(--brand-color);
-            line-height: 1.2;
+            line-height: 1.25;
         }
 
         .main-content-grid {
@@ -92,12 +92,12 @@
         .details-section p, .details-section ul {
             margin: 0;
             padding: 0;
-            line-height: 1.7;
+            line-height: 1.8;
             font-size: 1em;
         }
 
         .details-section > * {
-            margin-bottom: 28px;
+            margin-bottom: 32px;
         }
         .details-section > *:last-child {
             margin-bottom: 0;
@@ -257,13 +257,55 @@
             color: #1f2937;
         }
 
-        /* HINZUGEFÜGT: CSS für den Seitenumbruch */
         .page-break {
             page-break-after: always;
-            border-bottom: 1px solid var(--border-color); /* Eine feine Linie als visueller Indikator */
+            border-bottom: 1px solid var(--border-color);
             margin-bottom: 40px;
         }
 
+        /* --- NEU: Media Queries für Responsive Design --- */
+
+        /* Für Tablets und kleinere Desktops */
+        @media (max-width: 900px) {
+            .page-container {
+                padding: 32px;
+            }
+        }
+
+        /* Für Mobiltelefone */
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+            .page-container {
+                padding: 16px;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+            }
+            .header-grid {
+                grid-template-columns: 1fr; /* Stapelt Logo und Titel */
+                gap: 16px;
+                text-align: center;
+            }
+            .product-header {
+                font-size: 1.8em;
+            }
+            .main-content-grid {
+                grid-template-columns: 1fr; /* Stapelt Bild und Details */
+                gap: 32px;
+            }
+            .detail-images-grid {
+                grid-template-columns: 1fr; /* Stapelt Detailbilder */
+                gap: 16px;
+            }
+            .section-title {
+                font-size: 1.5em;
+            }
+            .page-break {
+                display: none; /* Seitenumbrüche auf Mobilgeräten ausblenden */
+            }
+        }
 
         @media print {
             body { background-color: #fff; padding: 0; font-family: 'Poppins', sans-serif; }
@@ -271,7 +313,7 @@
             .product-header, .section-title { color: var(--brand-color) !important; }
             .header-grid, .section-title { border-bottom-color: var(--brand-color) !important; }
             .checkmark { color: var(--brand-color) !important; }
-            .page-break { border-bottom: none; } /* Keine Linie im finalen Druck */
+            .page-break { display: block; border-bottom: none; } /* Seitenumbrüche im Druck wieder anzeigen */
             * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
@@ -323,6 +365,9 @@
                 {% endif %}
                 {% if available_sizes_value %}
                 <p><span class="detail-item">{{ sizes_label }}:</span> {{ available_sizes_value }}</p>
+                {% endif %}
+                {% if package_size_weight_value %}
+                <p><span class="detail-item">{{ package_size_weight_label }}:</span> {{ package_size_weight_value }}</p>
                 {% endif %}
             </div>
         </div>
@@ -427,6 +472,13 @@
             <div class="disclaimer-box">
                 <strong>{{ disclaimer_label }}:</strong> {{ disclaimer_text }}
             </div>
+            {% endif %}
+
+            <!-- HINWEIS ZUR MASCHINELLEN ÜBERSETZUNG -->
+            {% if translation_disclaimer %}
+            <p style="text-align: center; margin-top: 24px; font-size: 0.8em; color: #888;">
+                <em>{{ translation_disclaimer }}</em>
+            </p>
             {% endif %}
         </div>
     </div>

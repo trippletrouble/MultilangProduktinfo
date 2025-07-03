@@ -8,20 +8,21 @@ import time
 import deepl
 import re
 
-# Lade Umgebungsvariablen aus der .env Datei
+# Lade Umgebungsvariablen für die lokale Entwicklung
 load_dotenv()
 
-# --- NEU: DeepL API Key Konfiguration ---
-DEEPL_API_KEY_FROM_ENV = os.getenv("DEEPL_API_KEY")
-DEEPL_API_KEY = ""
-# Wir initialisieren den Translator später, um den API-Key nur einmal zu prüfen
+# --- API Key Konfiguration für Hosting & lokale Entwicklung ---
 translator = None
-if not DEEPL_API_KEY_FROM_ENV:
-    # Diese Nachricht wird in der Seitenleiste angezeigt, wenn der Schlüssel fehlt
-    pass
-else:
-    DEEPL_API_KEY = DEEPL_API_KEY_FROM_ENV
-    translator = deepl.Translator(DEEPL_API_KEY)
+try:
+    # Versuche, den Schlüssel aus den Streamlit Secrets zu laden (fürs Hosting)
+    api_key = st.secrets["DEEPL_API_KEY"]
+    if api_key:
+        translator = deepl.Translator(api_key)
+except (KeyError, FileNotFoundError):
+    # Wenn das fehlschlägt, lade ihn aus der .env Datei (für lokale Entwicklung)
+    api_key_from_env = os.getenv("DEEPL_API_KEY")
+    if api_key_from_env:
+        translator = deepl.Translator(api_key_from_env)
 
 
 # --- ERSETZTE FUNKTION: Jetzt für DeepL ---
@@ -145,11 +146,12 @@ def main():
     st.title("Produktseiten Generator V2 (DeepL)")
     st.markdown("Erstellen Sie mehrsprachige Produktblätter mit dem neuen PDF-Layout.")
 
-    if not DEEPL_API_KEY_FROM_ENV:
+    # --- Angepasste Prüfung für den API-Schlüssel ---
+    if not translator:
         st.sidebar.error(
-            "FEHLER: Kein DEEPL_API_KEY in der .env Datei gefunden. Übersetzungen werden fehlschlagen.")
+            "FEHLER: DeepL API-Schlüssel nicht konfiguriert. Bitte fügen Sie ihn zu den Streamlit Secrets (beim Hosting) oder zur .env-Datei (lokal) hinzu.")
     else:
-        st.sidebar.success("INFO: DeepL API Key erfolgreich aus .env geladen.")
+        st.sidebar.success("INFO: DeepL API-Schlüssel erfolgreich geladen.")
 
     st.divider()
 
@@ -198,6 +200,7 @@ def main():
                         "rows": [["110/116", "122/128", "134/140", "146/152", "158/164"]]}]
         }
     }
+
     default_texts_de = {"article_number_label": "Art.Nr.", "ean_code_label": "EAN",
                         "oeko_tex_standard_text": "OEKO-TEX® STANDARD 100",
                         "oeko_tex_logo_alt_text": "OEKO-TEX Logo Platzhalter",
@@ -206,7 +209,10 @@ def main():
                         "heading_product_description": "Produktbeschreibung", "heading_detail_views": "Detailansichten",
                         "heading_care_instructions": "Pflegehinweise",
                         "washing_instructions_before_first_use": "",
-                        "disclaimer_label": "Warnhinweis"}
+                        "disclaimer_label": "Warnhinweis",
+                        "translation_disclaimer": "Maschinell übersetzt mit DeepL. Bei Fragen kontaktieren Sie uns bitte.",
+                        "package_size_weight_label": "Verpackungsgröße & Gewicht"
+                        }
     product_data_de = {"ean_code_value": "4051512345678", "article_number_value": "ART-12345",
                        "warning_text_value": "Ihre volle Wirkung entfalten die suprima Hüftprotektor-Systeme nur durch den Einsatz von suprima-Protektoren!",
                        "color_name_value": "Schwarz", "available_sizes_value": "S M L",
@@ -238,6 +244,7 @@ def main():
     warning_text_value_de = st.text_area("Warnhinweis Text (Achtung)", product_data_de["warning_text_value"])
     color_name_value_de = st.text_input("Farbbezeichnung(en)", product_data_de["color_name_value"])
     available_sizes_value_de = st.text_input("Verfügbare Größen", product_data_de["available_sizes_value"])
+    package_size_weight_de = st.text_input("Verpackungsgröße & Gewicht", "25 x 15 x 5 cm, 200g")
 
     care_options_de = [item["text"] for item in CARE_INSTRUCTIONS_LIBRARY]
     selected_care_instructions_de = st.multiselect("Pflegehinweise auswählen:", options=care_options_de,
@@ -266,13 +273,11 @@ def main():
     st.header("2. Zielsprache & Optionen auswählen")
     col1_options, col2_options = st.columns(2)
     with col1_options:
-        # --- HINZUGEFÜGT: Neue Sprachen in der Dropdown-Liste ---
         language_options_with_codes = ["(GB) Englisch", "(FR) Französisch", "(DE) Deutsch", "(ES) Spanisch",
                                        "(IT) Italienisch", "(NL) Niederländisch", "(PT) Portugiesisch", "(PL) Polnisch",
                                        "(TR) Türkisch", "(SE) Schwedisch", "(DK) Dänisch", "(NO) Norwegisch",
                                        "(FI) Finnisch", "(IS) Isländisch", "(EE) Estnisch", "(LV) Lettisch",
                                        "(LT) Litauisch", "(JP) Japanisch", "(CN) Chinesisch (vereinfacht)",
-                                       # Neue Sprachen
                                        "(GR) Griechisch", "(CZ) Tschechisch", "(RO) Rumänisch",
                                        "(HU) Ungarisch", "(SK) Slowakisch", "(SI) Slowenisch"
                                        ]
@@ -306,7 +311,9 @@ def main():
                                   "washing_instructions_before_first_use": washing_instructions_de,
                                   "disclaimer_text": disclaimer_text_de,
                                   "features_list": [f.strip() for f in product_features_de_str.split("\n") if
-                                                    f.strip()]}
+                                                    f.strip()],
+                                  "package_size_weight_value": package_size_weight_de
+                                  }
 
             if not has_oeko_tex:
                 translated_context["oeko_tex_standard_text"] = ""
@@ -319,7 +326,9 @@ def main():
                                            "product_description_long": product_description_de,
                                            "warning_text": warning_text_value_de, "color_name": color_name_value_de,
                                            "washing_instructions_before_first_use": washing_instructions_de,
-                                           "disclaimer_text": disclaimer_text_de}
+                                           "disclaimer_text": disclaimer_text_de,
+                                           "package_size_weight_value": package_size_weight_de
+                                           }
                 for key, text in user_texts_to_translate.items():
                     if text.strip():
                         trans, err = translate_text_deepl_api_call(text, source_language, actual_target_language)
@@ -432,8 +441,9 @@ def main():
 
         template_file = "produkt_vorlage_v2.html"
         st.session_state.generated_html_content = create_html_from_template(template_file, final_context)
-        safe_product_name = "".join(c for c in product_name_de if c.isalnum() or c in (' ', '_')).rstrip()
-        st.session_state.download_filename = f"{safe_product_name.replace(' ', '_')}_{final_context['lang_code']}.html"
+
+        # --- GEÄNDERT: Dateiname verwendet jetzt die Artikelnummer ---
+        st.session_state.download_filename = f"{article_number_value_de}_{final_context['lang_code']}.html"
 
         st.session_state.is_loading = False
         st.rerun()
