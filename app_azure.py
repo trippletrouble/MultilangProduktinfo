@@ -138,9 +138,11 @@ def create_html_from_template(template_filename, context):
 
 
 def get_image_data_url(uploaded_file):
+    """Konvertiert eine hochgeladene Datei in eine Base64-Daten-URL."""
     if uploaded_file:
         return f"data:{uploaded_file.type};base64,{base64.b64encode(uploaded_file.getvalue()).decode('utf-8')}"
-    return ""
+    # Gibt None zurück, wenn keine Datei vorhanden ist. Dies ist wichtig für die Logik.
+    return None
 
 
 def load_local_svg(filepath: str) -> str:
@@ -185,9 +187,10 @@ def render_product_generator(user_info):
     st.divider()
 
     # Session State initialisieren
+    # KORRIGIERT: Standardwert für Bilder ist None, nicht ""
     for key, default_value in {'generated_html_content': "", 'download_filename': "produktblatt.html",
-                               'error_message': "", 'is_loading': False, 'image_main_data_url': "",
-                               'image_detail1_data_url': "", 'image_detail2_data_url': ""}.items():
+                               'error_message': "", 'is_loading': False, 'image_main_data_url': None,
+                               'image_detail1_data_url': None, 'image_detail2_data_url': None}.items():
         if key not in st.session_state: st.session_state[key] = default_value
     if 'suprima_logo_data_url' not in st.session_state:
         st.session_state.suprima_logo_data_url = load_local_svg("logo-3.svg")
@@ -225,9 +228,10 @@ def render_product_generator(user_info):
     with col3:
         uploaded_image_detail2 = st.file_uploader("Detailbild 2", type=["png", "jpg", "jpeg"], key="img_detail2")
 
-    if uploaded_image_main: st.session_state.image_main_data_url = get_image_data_url(uploaded_image_main)
-    if uploaded_image_detail1: st.session_state.image_detail1_data_url = get_image_data_url(uploaded_image_detail1)
-    if uploaded_image_detail2: st.session_state.image_detail2_data_url = get_image_data_url(uploaded_image_detail2)
+    # KORRIGIERT: Der Session State wird bei jedem Durchlauf aktualisiert, um entfernte Bilder zu erfassen.
+    st.session_state.image_main_data_url = get_image_data_url(uploaded_image_main)
+    st.session_state.image_detail1_data_url = get_image_data_url(uploaded_image_detail1)
+    st.session_state.image_detail2_data_url = get_image_data_url(uploaded_image_detail2)
 
     st.divider()
 
@@ -311,7 +315,7 @@ def render_product_generator(user_info):
                     (item["icon_filename"] for item in CARE_INSTRUCTIONS_LIBRARY if item["text"] == text), None)
                 if icon_filename:
                     trans_text = text if actual_target_language == source_language else \
-                    translate_text_deepl_api_call(text, source_language, actual_target_language)[0]
+                        translate_text_deepl_api_call(text, source_language, actual_target_language)[0]
                     icon_path = os.path.join("Waschlabellen", icon_filename)
                     icon_data_url = load_local_svg(icon_path)
                     if icon_data_url: translated_care_items.append({"icon_url": icon_data_url, "text": trans_text})
@@ -324,7 +328,7 @@ def render_product_generator(user_info):
 
                 def translate_if_needed(text):
                     return text if actual_target_language == source_language else \
-                    translate_text_deepl_api_call(text, source_language, actual_target_language)[0]
+                        translate_text_deepl_api_call(text, source_language, actual_target_language)[0]
 
                 translated_chart["title"] = translate_if_needed(chart_data["title"])
                 if "footer" in chart_data: translated_chart["footer"] = translate_if_needed(chart_data["footer"])
@@ -346,8 +350,6 @@ def render_product_generator(user_info):
         else:
             st.session_state.error_message = "Produktblatt erfolgreich generiert!"
 
-        # KORRIGIERT: Keine Platzhalter für Detailbilder mehr.
-        # Wenn ein Bild nicht hochgeladen wurde, ist sein Wert `None` und wird im Template ignoriert.
         final_context = {**translated_context, "ean_code_value": ean_code_value_de,
                          "article_number_value": article_number_value_de,
                          "available_sizes_value": available_sizes_value_de,

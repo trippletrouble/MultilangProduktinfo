@@ -152,8 +152,10 @@
         }
 
         .detail-images-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
             gap: 24px;
             margin-bottom: 32px;
         }
@@ -382,10 +384,12 @@
         </div>
         {% endif %}
 
+        <!-- KORRIGIERT: Dieser ganze Abschnitt wird nur angezeigt, wenn mindestens ein Detailbild vorhanden ist. -->
         {% if image_detail1_url or image_detail2_url %}
         <div class="detail-views-section">
             <h2 class="section-title">{{ heading_detail_views }}</h2>
             <div class="detail-images-grid">
+                <!-- Jedes Bild wird nur angezeigt, wenn es hochgeladen wurde. -->
                 {% if image_detail1_url %}<img src="{{ image_detail1_url }}" alt="Detailbild 1">{% endif %}
                 {% if image_detail2_url %}<img src="{{ image_detail2_url }}" alt="Detailbild 2">{% endif %}
             </div>
@@ -475,7 +479,7 @@
             {% endif %}
 
             <!-- HINWEIS ZUR MASCHINELLEN ÜBERSETZUNG -->
-            {% if translation_disclaimer %}
+            {% if lang_code != 'de' and translation_disclaimer %}
             <p style="text-align: center; margin-top: 24px; font-size: 0.8em; color: #888;">
                 <em>{{ translation_disclaimer }}</em>
             </p>
