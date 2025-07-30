@@ -346,13 +346,15 @@ def render_product_generator(user_info):
         else:
             st.session_state.error_message = "Produktblatt erfolgreich generiert!"
 
+        # KORRIGIERT: Keine Platzhalter für Detailbilder mehr.
+        # Wenn ein Bild nicht hochgeladen wurde, ist sein Wert `None` und wird im Template ignoriert.
         final_context = {**translated_context, "ean_code_value": ean_code_value_de,
                          "article_number_value": article_number_value_de,
                          "available_sizes_value": available_sizes_value_de,
                          "lang_code": get_html_lang_code(actual_target_language),
                          "image_main_url": st.session_state.image_main_data_url or 'https://placehold.co/400x400/e2e8f0/a0aec0?text=Hauptbild',
-                         "image_detail1_url": st.session_state.image_detail1_data_url or 'https://placehold.co/300x200/e2e8f0/a0aec0?text=Detail+1',
-                         "image_detail2_url": st.session_state.image_detail2_data_url or 'https://placehold.co/300x200/e2e8f0/a0aec0?text=Detail+2',
+                         "image_detail1_url": st.session_state.image_detail1_data_url,
+                         "image_detail2_url": st.session_state.image_detail2_data_url,
                          "suprima_logo_url": st.session_state.suprima_logo_data_url}
         st.session_state.generated_html_content = create_html_from_template("produkt_vorlage_v2.html", final_context)
         st.session_state.download_filename = f"{article_number_value_de}_{final_context['lang_code']}.html"
@@ -411,6 +413,7 @@ def main():
         render_product_generator(login_token)
         if st.sidebar.button("Logout"):
             # Um sich abzumelden, müssen wir den Status in der Sitzung löschen und die App neu ausführen.
+            # Beachten Sie: Dies meldet den Benutzer nur aus der App ab, nicht aus dem Microsoft-Konto.
             st.session_state['login_token'] = None
             st.rerun()
     else:
